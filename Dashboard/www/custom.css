@@ -1,0 +1,108 @@
+/* custom.css */
+
+body, .skin-blue .main-header .navbar, .skin-blue .main-header .logo {
+  background-color: #222;
+  color: #ddd;
+}
+
+.sidebar-menu>li>a {
+  color: #ddd;
+}
+
+.sidebar-menu>li.active>a, .sidebar-menu>li:hover>a {
+  background-color: #333;
+  color: #fff;
+}
+
+.main-header .navbar-custom-menu>.navbar-nav>li>a {
+  color: #ddd;
+}
+
+.content-wrapper, .right-side {
+  background-color: #333;
+}
+
+.box.box-primary {
+  border-top-color: #444;
+}
+
+.box {
+  background-color: #444;
+  border: 1px solid #444;
+}
+
+.box-title {
+  color: #fff;
+}
+
+.nav-tabs-custom>.nav-tabs>li.header {
+  color: #ddd;
+}
+
+.nav-tabs-custom>.nav-tabs>li.active>a, .nav-tabs-custom>.nav-tabs>li.active:hover>a {
+  background-color: #444;
+  color: #fff;
+}
+
+.nav-tabs-custom>.nav-tabs>li>a {
+  color: #ddd;
+}
+
+.tab-content {
+  background-color: #333;
+}
+
+.selectize-input, .selectize-dropdown {
+  background-color: #444;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+.selectize-input {
+  border-radius: 4px;
+}
+
+.selectize-dropdown-content .option:hover {
+  background-color: #555;
+}
+
+.btn {
+  background-color: #444;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+.btn:hover, .btn:focus {
+  background-color: #555;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  background-color: #444;
+  color: #ddd !important;
+  border: 1px solid #444;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background-color: #555;
+  color: #fff !important;
+  border: 1px solid #555;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  background-color: #444;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+.dataTables_wrapper .dataTables_length select {
+  background-color: #444;
+  color: #ddd;
+  border: 1px solid #444;
+}
+
+.echarts {
+  background-color: #333 !important;
+  color: #ddd !important;
+}
