@@ -6,6 +6,7 @@ library(reactable)
 library(shinyWidgets)
 library(shinycssloaders)
 library(shinyjs)
+library(webshot2)
 library(gt)
 
 ui <- tagList(
