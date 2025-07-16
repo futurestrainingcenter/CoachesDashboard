@@ -9,6 +9,7 @@ library(fmsb)
 library(gt)
 library(RPostgres)
 library(DBI)
+library(webshot2)
 
 if (file.exists("www/good times rg.otf")) {
   font_add("Good Times", regular = "www/good times rg.otf")

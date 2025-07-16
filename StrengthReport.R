@@ -7,6 +7,7 @@ library(scales)
 library(showtext)
 library(fmsb)
 library(gt)
+library(webshot2)
 
 if (file.exists("www/good times rg.otf")) {
   font_add("Good Times", regular = "www/good times rg.otf")

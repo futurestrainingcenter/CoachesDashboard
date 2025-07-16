@@ -10,6 +10,29 @@
     "has_parameters": false
   },
   "packages": {
+    "AsioHeaders": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "AsioHeaders",
+        "Type": "Package",
+        "Title": "'Asio' C++ Header Files",
+        "Version": "1.22.1-2",
+        "Date": "2022-12-07",
+        "Author": "Dirk Eddelbuettel",
+        "Maintainer": "Dirk Eddelbuettel <edd@debian.org>",
+        "Description": "'Asio' is a cross-platform C++ library for network and low-level\n I/O programming that provides developers with a consistent asynchronous model\n using a modern C++ approach. It is also included in Boost but requires linking\n when used with Boost. Standalone it can be used header-only (provided a recent\n compiler). 'Asio' is written and maintained by Christopher M. Kohlhoff, and\n released under the 'Boost Software License', Version 1.0.",
+        "Copyright": "file inst/COPYRIGHTS",
+        "License": "BSL-1.0",
+        "URL": "https://github.com/eddelbuettel/asioheaders,\nhttps://dirk.eddelbuettel.com/code/asioheaders.html",
+        "BugReports": "https://github.com/eddelbuettel/asioheaders/issues",
+        "NeedsCompilation": "no",
+        "Packaged": "2022-12-08 04:04:23 UTC; edd",
+        "Repository": "CRAN",
+        "Date/Publication": "2022-12-08 08:12:34 UTC",
+        "Built": "R 4.3.0; ; 2023-04-05 23:09:56 UTC; unix"
+      }
+    },
     "BH": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -873,6 +896,35 @@
         "Repository": "CRAN",
         "Date/Publication": "2016-07-27 03:17:48",
         "Built": "R 4.3.0; ; 2023-04-11 04:45:54 UTC; unix"
+      }
+    },
+    "chromote": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "chromote",
+        "Title": "Headless Chrome Web Browser Interface",
+        "Version": "0.3.1",
+        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", , \"winston@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Barret\", \"Schloerke\", , \"barret@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0001-9986-114X\")),\n    person(\"Garrick\", \"Aden-Buie\", , \"garrick@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0002-7111-0077\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
+        "Description": "An implementation of the 'Chrome DevTools Protocol', for\n    controlling a headless Chrome web browser.",
+        "License": "GPL-2",
+        "URL": "https://rstudio.github.io/chromote/,\nhttps://github.com/rstudio/chromote",
+        "BugReports": "https://github.com/rstudio/chromote/issues",
+        "Imports": "curl, fastmap, jsonlite, later (>= 1.1.0), magrittr, processx,\npromises (>= 1.1.1), R6, rlang, utils, websocket (>= 1.2.0)",
+        "Suggests": "showimage, testthat (>= 3.0.0)",
+        "Config/Needs/website": "tidyverse/tidytemplate",
+        "Config/testthat/edition": "3",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "RoxygenNote": "7.3.2",
+        "SystemRequirements": "Google Chrome or other Chromium-based browser.\nchromium: chromium (rpm) or chromium-browser (deb)",
+        "NeedsCompilation": "no",
+        "Packaged": "2024-08-29 17:52:08 UTC; garrick",
+        "Author": "Winston Chang [aut, cre],\n  Barret Schloerke [aut] (<https://orcid.org/0000-0001-9986-114X>),\n  Garrick Aden-Buie [aut] (<https://orcid.org/0000-0002-7111-0077>),\n  Posit Software, PBC [cph, fnd]",
+        "Maintainer": "Winston Chang <winston@posit.co>",
+        "Repository": "CRAN",
+        "Date/Publication": "2024-08-30 07:10:02 UTC",
+        "Built": "R 4.3.3; ; 2024-08-30 09:51:32 UTC; unix"
       }
     },
     "cli": {
@@ -5290,6 +5342,62 @@
         "Archs": "vroom.so.dSYM"
       }
     },
+    "webshot2": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "webshot2",
+        "Title": "Take Screenshots of Web Pages",
+        "Version": "0.1.1",
+        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", , \"winston@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Barret\", \"Schloerke\", , \"barret@posit.co\", role = \"ctb\",\n           comment = c(ORCID = \"0000-0001-9986-114X\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
+        "Description": "Takes screenshots of web pages, including Shiny applications\n    and R Markdown documents. 'webshot2' uses headless Chrome or Chromium\n    as the browser back-end.",
+        "License": "GPL-2",
+        "URL": "https://rstudio.github.io/webshot2/,\nhttps://github.com/rstudio/webshot2",
+        "BugReports": "https://github.com/rstudio/webshot2/issues",
+        "Depends": "R (>= 3.2)",
+        "Imports": "callr, chromote (>= 0.1.0), later, magrittr, promises",
+        "Suggests": "httpuv, rmarkdown, shiny",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "RoxygenNote": "7.2.3",
+        "NeedsCompilation": "no",
+        "Packaged": "2023-08-11 21:17:46 UTC; garrick",
+        "Author": "Winston Chang [aut, cre],\n  Barret Schloerke [ctb] (<https://orcid.org/0000-0001-9986-114X>),\n  Posit Software, PBC [cph, fnd]",
+        "Maintainer": "Winston Chang <winston@posit.co>",
+        "Repository": "CRAN",
+        "Date/Publication": "2023-08-11 22:00:02 UTC",
+        "Built": "R 4.3.0; ; 2023-08-11 23:00:46 UTC; unix"
+      }
+    },
+    "websocket": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "websocket",
+        "Version": "1.4.2",
+        "Title": "'WebSocket' Client Library",
+        "Description": "Provides a 'WebSocket' client interface for R.\n    'WebSocket' is a protocol for low-overhead real-time communication:\n    <https://en.wikipedia.org/wiki/WebSocket>.",
+        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", role = c(\"aut\", \"cre\"), email = \"winston@posit.co\"),\n    person(\"Joe\", \"Cheng\", role = \"aut\", email = \"joe@posit.co\"),\n    person(\"Alan\", \"Dipert\", role = \"aut\"),\n    person(\"Barbara\", \"Borges\", role = \"aut\"),\n    person(family = \"Posit, PBC\", role = \"cph\"),\n    person(\"Peter\", \"Thorson\", role = c(\"ctb\", \"cph\"), comment = \"WebSocket++ library\"),\n    person(\"René\", \"Nyffenegger\", role = c(\"ctb\", \"cph\"), comment = \"Base 64 library\"),\n    person(\"Micael\", \"Hildenborg\", role = c(\"ctb\", \"cph\"), comment = \"SHA1 library\"),\n    person(family = \"Aladdin Enterprises\", role = \"cph\", comment = \"MD5 library\"),\n    person(\"Bjoern\", \"Hoehrmann\", role = c(\"ctb\", \"cph\"), comment = \"UTF8 Validation library\"))",
+        "License": "GPL-2",
+        "Encoding": "UTF-8",
+        "ByteCompile": "true",
+        "Imports": "R6, later (>= 1.2.0)",
+        "LinkingTo": "cpp11, AsioHeaders, later",
+        "BugReports": "https://github.com/rstudio/websocket/issues",
+        "SystemRequirements": "GNU make, OpenSSL >= 1.0.2",
+        "RoxygenNote": "7.3.2",
+        "Suggests": "httpuv, testthat, knitr, rmarkdown",
+        "VignetteBuilder": "knitr",
+        "NeedsCompilation": "yes",
+        "Packaged": "2024-07-22 17:16:18 UTC; winston",
+        "Author": "Winston Chang [aut, cre],\n  Joe Cheng [aut],\n  Alan Dipert [aut],\n  Barbara Borges [aut],\n  Posit, PBC [cph],\n  Peter Thorson [ctb, cph] (WebSocket++ library),\n  René Nyffenegger [ctb, cph] (Base 64 library),\n  Micael Hildenborg [ctb, cph] (SHA1 library),\n  Aladdin Enterprises [cph] (MD5 library),\n  Bjoern Hoehrmann [ctb, cph] (UTF8 Validation library)",
+        "Maintainer": "Winston Chang <winston@posit.co>",
+        "Repository": "CRAN",
+        "Date/Publication": "2024-07-22 22:20:01 UTC",
+        "Built": "R 4.3.3; aarch64-apple-darwin20; 2024-07-23 00:06:51 UTC; unix",
+        "Archs": "websocket.so.dSYM"
+      }
+    },
     "withr": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -5469,7 +5577,7 @@
       "checksum": "c8af58a8ae37e6d3fee96b55eebf654e"
     },
     "HittingReport.R": {
-      "checksum": "a8b0d07715447d030dd2b3e63c1b2e9c"
+      "checksum": "6d3839edfebc8851b0db1e2c5a8b9734"
     },
     "HittraxData.rds": {
       "checksum": "6f7e5afc1578ab2edf033d451d7a8f63"
@@ -5478,25 +5586,25 @@
       "checksum": "05f63321cac6d44b1c44f64d1308e899"
     },
     "PitchingReport.R": {
-      "checksum": "3847ba09cc50084ef4c48d4b372e02ad"
+      "checksum": "2029ea48216e78b9b47aa5d9b0381134"
     },
     "README.md": {
       "checksum": "cc4c8b01b9f138bb944184d0797c7d4b"
     },
     "server.R": {
-      "checksum": "c4bee585161aaa765276347c7f8ebfc6"
+      "checksum": "adf1f74af63b1f5f31c9ad4c2768aa14"
     },
     "SpeedFacilityData.rds": {
       "checksum": "a34d6c2758474c0a8be018c1e0686178"
     },
     "SpeedReport.R": {
-      "checksum": "2f63032b2ed87582acc0914ffd0c8816"
+      "checksum": "e19ec4df4e15e6a9b4fc40816ba80ce4"
     },
     "StrengthFacilityData.rds": {
       "checksum": "31b8afbe21defd19d229ec1622977494"
     },
     "StrengthReport.R": {
-      "checksum": "026eefe830aec502c3751581e71a1da7"
+      "checksum": "d6e3f80259442138f2cca7d9876891e9"
     },
     "TrackmanData.rds": {
       "checksum": "ba28725c6736185d9c315b18e44b4991"

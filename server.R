@@ -17,8 +17,6 @@ source("SpeedReport.R", local = TRUE)
 
 server <- function(input, output, session) {
   
-  if (FALSE) webshot2::webshot
-  
   # ── Load data once at startup ──────────────────────────────────────
   hitting_data <- readRDS("HittingFacilityData.rds") %>%
     filter(!`Service Name` %in% c(
