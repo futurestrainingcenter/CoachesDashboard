@@ -6,6 +6,7 @@ library(tidyverse)
 library(pdftools)
 library(plotly)
 library(gt)
+library(webshot2)
 library(reactable)
 
 # Source report functions
