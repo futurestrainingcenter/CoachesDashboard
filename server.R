@@ -7,6 +7,7 @@ library(pdftools)
 library(plotly)
 library(gt)
 library(reactable)
+library(webshot2)
 
 # Source report functions
 source("HittingReport.R", local = TRUE)
@@ -15,6 +16,8 @@ source("StrengthReport.R", local = TRUE)
 source("SpeedReport.R", local = TRUE)
 
 server <- function(input, output, session) {
+  
+  if (FALSE) webshot2::webshot
   
   # ── Load data once at startup ──────────────────────────────────────
   hitting_data <- readRDS("HittingFacilityData.rds") %>%
