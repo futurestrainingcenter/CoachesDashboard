@@ -468,7 +468,7 @@ if (any(!is.na(current_athlete_summary$`MaxEV Percent Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>%
-    opt_table_font(font = "transitional") %>% 
+    opt_table_font(font = "Helvetica") %>% 
     # Apply arrow icons and value changes
     text_transform(
       locations = cells_body(columns = Value),
@@ -493,7 +493,7 @@ if (any(!is.na(current_athlete_summary$`MaxEV Percent Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>% 
-    opt_table_font(font = "transitional")
+    opt_table_font(font = "Helvetica")
   
   hjust_value <- -7.50
   
@@ -618,7 +618,7 @@ if (any(!is.na(current_athlete_summary$`MaxDist Percent Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>%
-    opt_table_font(font = "transitional") %>% 
+    opt_table_font(font = "Helvetica") %>% 
     # Apply arrow icons and value changes
     text_transform(
       locations = cells_body(columns = Value),
@@ -640,7 +640,7 @@ if (any(!is.na(current_athlete_summary$`MaxDist Percent Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>% 
-    opt_table_font(font = "transitional")
+    opt_table_font(font = "Helvetica")
 }
 
 min_maxDist <- athlete_summary %>%
@@ -751,7 +751,7 @@ if (any(!is.na(current_athlete_summary$`AvgEV Percent Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>%
-    opt_table_font(font = "transitional") %>% 
+    opt_table_font(font = "Helvetica") %>% 
     # Apply arrow icons and value changes
     text_transform(
       locations = cells_body(columns = Value),
@@ -773,7 +773,7 @@ if (any(!is.na(current_athlete_summary$`AvgEV Percent Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>% 
-    opt_table_font(font = "transitional")
+    opt_table_font(font = "Helvetica")
 }
 
 min_avgVel <- athlete_summary %>%
@@ -887,7 +887,7 @@ if (any(!is.na(current_athlete_summary$`Barrel Value Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>%
-    opt_table_font(font = "transitional") %>% 
+    opt_table_font(font = "Helvetica") %>% 
     # Apply arrow icons and value changes
     text_transform(
       locations = cells_body(columns = Value),
@@ -909,7 +909,7 @@ if (any(!is.na(current_athlete_summary$`Barrel Value Change (Month)`))) {
       table.border.bottom.style = "hidden",
       data_row.padding = px(4)
     ) %>% 
-    opt_table_font(font = "transitional")
+    opt_table_font(font = "Helvetica")
 }
 
 min_barrel <- athlete_summary %>%
@@ -1103,7 +1103,7 @@ batted_ball_table <- batted_ball_metrics %>%
     data_row.padding         = px(7),
     table.font.size          = px(13)
   ) %>% 
-  opt_table_font(font = "transitional") %>% 
+  opt_table_font(font = "Helvetica") %>% 
   tab_style(
     style     = cell_text(color = "#3d9be9"),
     locations = cells_column_labels()
@@ -1350,7 +1350,7 @@ if (is.na(current_athlete_summary$OnPlaneEff)) {
       data_row.padding = px(5),
       table.font.size = px(13)
     ) %>%
-    opt_table_font(font = "transitional") %>% 
+    opt_table_font(font = "Helvetica") %>% 
     # Standard percentile coloring for non-OPE rows
     tab_style(
       style = cell_text(color = "#FF0000"),
@@ -1514,7 +1514,7 @@ if (is.na(current_athlete_summary$OnPlaneEff)) {
       data_row.padding = px(5),
       table.font.size = px(13)
     ) %>%
-    opt_table_font(font = "transitional") %>% 
+    opt_table_font(font = "Helvetica") %>% 
     tab_style(
       style = cell_text(color = "#FF0000"),  # Red
       locations = cells_body(
