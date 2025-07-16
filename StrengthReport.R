@@ -7,7 +7,6 @@ library(scales)
 library(showtext)
 library(fmsb)
 library(gt)
-library(webshot2)
 
 if (file.exists("www/good times rg.otf")) {
   font_add("Good Times", regular = "www/good times rg.otf")
@@ -2591,62 +2590,6 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
   report_img     <- image_composite(report_img, extf_plot_img, offset = "+1570+2675")
   
   rm(extf_plot_img)
-  gc()
-  
-  
-  if (nrow(filtered_weight) > 2) {
-    
-    date_range_months <- filtered_weight %>%
-      summarise(months = n_distinct(format(Date, "%Y-%m"))) %>%
-      pull(months)
-    
-    # Choose label format and breaks accordingly
-    date_label_format <- if (date_range_months > 1) "%b '%y" else "%b %d"
-    
-    # Calculate weight change
-    weight_change <- round(last_weight$Weight - first_weight$Weight, 1)
-    
-    weight_plot <- ggplot(filtered_weight, aes(x = Date, y = Weight)) +
-      geom_line(color = "black", linewidth = 1.25) +
-      geom_text(data = first_weight, aes(label = paste0(round(Weight, 1), " lbs")),
-                hjust = 1.1, vjust = -1, size = 6) +
-      geom_text(data = last_weight, aes(label = paste0(round(Weight, 1), " lbs")),
-                hjust = -0.1, vjust = -1, size = 6) +
-      labs(title = paste0(
-        "Weight Progress: ", 
-        ifelse(weight_change > 0, "+", ""), 
-        weight_change, " lbs"),
-        x = NULL, y = NULL
-      ) +
-      scale_x_date(
-        date_labels = date_label_format
-      ) +
-      coord_cartesian(clip = 'off') +
-      theme_void() +
-      theme(
-        axis.text.x = element_text(color = "black", size = 10),
-        plot.title = element_text(size = 26, hjust = 0.5, margin = margin(b = 25)),
-        plot.margin = margin(t = 10, r = 50, b = 30, l = 50)
-      )
-    
-  } else {
-    weight_plot <- ggplot() +
-      theme_void()
-  }
-  
-  # Save & composite your weight plot in-place
-  weight_plot_path <- file.path(athlete_dir, paste0(athlete, " - weight_plot.png"))
-  ggsave(weight_plot_path,
-         plot   = weight_plot,
-         width  = 3.5, height = 2.5,
-         units  = "in",
-         dpi    = 150)
-  
-  weight_img  <- image_read(weight_plot_path)
-  report_img  <- image_composite(report_img, weight_img, offset = "+1975+75")
-  
-  # Free the temporary image from memory
-  rm(weight_img)
   gc()
   
   

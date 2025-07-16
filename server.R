@@ -7,7 +7,6 @@ library(pdftools)
 library(plotly)
 library(gt)
 library(reactable)
-library(webshot2)
 
 # Source report functions
 source("HittingReport.R", local = TRUE)
@@ -1327,12 +1326,12 @@ server <- function(input, output, session) {
       geom_line(color = "#010101", linewidth = 8) +
       geom_text(aes(label = Percentile), color = "white", size = 5, fontface = "bold", hjust = 0.5, vjust = 0.5) +
       scale_x_continuous(limits = c(-2.5, 100)) +
-      scale_color_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
-      scale_fill_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_color_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_fill_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
       theme_void() +
       theme(
         legend.position   = "none",
-        axis.text.y       = element_text(size = 10, face = "bold.italic", colour = "grey20", hjust = 1),
+        axis.text.y       = element_text(size = 10, face = "bold", color = "grey20", hjust = 1),
         panel.background  = element_blank()
       )
   })
@@ -1930,12 +1929,12 @@ server <- function(input, output, session) {
       geom_line(color = "#010101", linewidth = 8) +
       geom_text(aes(label = Percentile), color = "white", size = 5, fontface = "bold", hjust = 0.5, vjust = 0.5) +
       scale_x_continuous(limits = c(-2.5, 100)) +
-      scale_color_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
-      scale_fill_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_color_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_fill_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
       theme_void() +
       theme(
         legend.position   = "none",
-        axis.text.y       = element_text(size = 10, face = "bold.italic", colour = "grey20", hjust = 1),
+        axis.text.y       = element_text(size = 10, face = "bold", color = "grey20", hjust = 1),
         panel.background  = element_blank()
       )
   })
@@ -2610,12 +2609,12 @@ server <- function(input, output, session) {
       geom_line(color = "#010101", linewidth = 8) +
       geom_text(aes(label = Percentile), color = "white", size = 5, fontface = "bold", hjust = 0.5, vjust = 0.5) +
       scale_x_continuous(limits = c(-2.5, 100)) +
-      scale_color_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
-      scale_fill_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_color_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_fill_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
       theme_void() +
       theme(
         legend.position   = "none",
-        axis.text.y       = element_text(size = 10, face = "bold.italic", colour = "grey20", hjust = 1),
+        axis.text.y       = element_text(size = 10, face = "bold", color = "grey20", hjust = 1),
         panel.background  = element_blank()
       )
   })
@@ -3083,12 +3082,12 @@ server <- function(input, output, session) {
       geom_line(color = "#010101", linewidth = 8) +
       geom_text(aes(label = Percentile), color = "white", size = 5, fontface = "bold", hjust = 0.5, vjust = 0.5) +
       scale_x_continuous(limits = c(-2.5, 100)) +
-      scale_color_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
-      scale_fill_gradientn(colours = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_color_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
+      scale_fill_gradientn(colors = c("#2166ac", "#B9CED0", "#b2182b"), limits = c(0, 100), na.value = "#2166ac") +
       theme_void() +
       theme(
         legend.position   = "none",
-        axis.text.y       = element_text(size = 10, face = "bold.italic", colour = "grey20", hjust = 1),
+        axis.text.y       = element_text(size = 10, face = "bold", color = "grey20", hjust = 1),
         panel.background  = element_blank()
       )
   })

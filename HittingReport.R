@@ -7,7 +7,6 @@ library(scales)
 library(showtext)
 library(fmsb)
 library(gt)
-library(webshot2)
 
 if (file.exists("www/good times rg.otf")) {
   font_add("Good Times", regular = "www/good times rg.otf")
@@ -467,7 +466,8 @@ if (any(!is.na(current_athlete_summary$`MaxEV Percent Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     ) %>%
     # Apply arrow icons and value changes
     text_transform(
@@ -491,7 +491,8 @@ if (any(!is.na(current_athlete_summary$`MaxEV Percent Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     )
   
   hjust_value <- -7.50
@@ -615,7 +616,8 @@ if (any(!is.na(current_athlete_summary$`MaxDist Percent Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     ) %>%
     # Apply arrow icons and value changes
     text_transform(
@@ -636,7 +638,8 @@ if (any(!is.na(current_athlete_summary$`MaxDist Percent Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     )
 }
 
@@ -746,7 +749,8 @@ if (any(!is.na(current_athlete_summary$`AvgEV Percent Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     ) %>%
     # Apply arrow icons and value changes
     text_transform(
@@ -767,7 +771,8 @@ if (any(!is.na(current_athlete_summary$`AvgEV Percent Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     )
 }
 
@@ -880,7 +885,8 @@ if (any(!is.na(current_athlete_summary$`Barrel Value Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     ) %>%
     # Apply arrow icons and value changes
     text_transform(
@@ -901,7 +907,8 @@ if (any(!is.na(current_athlete_summary$`Barrel Value Change (Month)`))) {
       column_labels.hidden = TRUE,
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
-      data_row.padding = px(4)
+      data_row.padding = px(4),
+      table.font.names = "sans‑serif"
     )
 }
 
@@ -1094,7 +1101,8 @@ batted_ball_table <- batted_ball_metrics %>%
     table.border.top.style   = "hidden",
     table.border.bottom.style= "hidden",
     data_row.padding         = px(7),
-    table.font.size          = px(13)
+    table.font.size          = px(13),
+    table.font.names         = "sans‑serif"
   ) %>% 
   tab_style(
     style     = cell_text(color = "#3d9be9"),
@@ -1340,7 +1348,8 @@ if (is.na(current_athlete_summary$OnPlaneEff)) {
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
       data_row.padding = px(5),
-      table.font.size = px(13)
+      table.font.size = px(13),
+      table.font.names = "sans‑serif"
     ) %>%
     # Standard percentile coloring for non-OPE rows
     tab_style(
@@ -1503,7 +1512,8 @@ if (is.na(current_athlete_summary$OnPlaneEff)) {
       table.border.top.style = "hidden",
       table.border.bottom.style = "hidden",
       data_row.padding = px(5),
-      table.font.size = px(13)
+      table.font.size = px(13),
+      table.font.names = "sans‑serif"
     ) %>%
     tab_style(
       style = cell_text(color = "#FF0000"),  # Red
@@ -1581,7 +1591,7 @@ if (is.na(current_athlete_summary$OnPlaneEff)) {
   
   # Read & composite the damage radar plot in-place
   damage_radar_img <- image_read(damage_radar_path)
-  report_img        <- image_composite(report_img, damage_radar_img, offset = "+75+2625")
+  report_img <- image_composite(report_img, damage_radar_img, offset = "+75+2625")
   rm(damage_radar_img)
   gc()
   
