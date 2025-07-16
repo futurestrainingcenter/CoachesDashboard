@@ -413,6 +413,7 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
       heading.border.bottom.style = "hidden",
       table_body.vlines.style = "solid"
     ) %>% 
+    opt_table_font(font = "Helvetica") %>% 
     cols_width(
       `Pitch Type` ~ px(125),
       `%` ~ px(50),
@@ -529,6 +530,7 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
       ) %>%
+      opt_table_font(font = "Helvetica") %>% 
       # Apply arrow icons and value changes
       text_transform(
         locations = cells_body(columns = Value),
@@ -552,7 +554,8 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
     
     hjust_value <- -7.50
     
@@ -829,6 +832,7 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         # Apply arrow icons and value changes
         text_transform(
           locations = cells_body(columns = Value),
@@ -914,6 +918,7 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         # Apply arrow icons and value changes
         text_transform(
           locations = cells_body(columns = Value),
@@ -960,7 +965,8 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -991,7 +997,8 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -1020,7 +1027,8 @@ generate_pitching_report <- function(client_data, pitching_data, trackman_data, 
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your strength GT table in-place

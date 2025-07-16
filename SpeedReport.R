@@ -391,6 +391,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -461,6 +462,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -505,7 +507,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not November 2024
@@ -535,7 +538,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>%
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -564,7 +568,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your Thirty Yard GT table in-place
@@ -659,6 +664,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -744,6 +750,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -794,7 +801,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not November 2024
@@ -830,7 +838,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -859,7 +868,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your Acceleration GT table in-place
@@ -951,6 +961,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1019,6 +1030,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1063,7 +1075,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not November 2024
@@ -1093,7 +1106,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -1122,7 +1136,8 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your Max Velo GT table in‐place

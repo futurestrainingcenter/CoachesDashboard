@@ -470,6 +470,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -555,6 +556,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -608,7 +610,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -647,7 +650,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -676,7 +680,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your IBSQT GT table in‑place
@@ -771,6 +776,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -840,6 +846,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -885,7 +892,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -916,7 +924,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>%
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -945,7 +954,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your CMJ GT table in‑place
@@ -1053,6 +1063,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1138,6 +1149,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1191,7 +1203,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -1230,7 +1243,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -1259,7 +1273,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your ISO Trunk Rotation GT table in-place
@@ -1350,6 +1365,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1419,6 +1435,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1464,7 +1481,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -1495,7 +1513,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -1524,7 +1543,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your trunkRotation GT table in-place
@@ -1632,6 +1652,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1717,6 +1738,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -1770,7 +1792,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -1809,7 +1832,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -1838,7 +1862,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your SHLD ISO Y GT table in-place
@@ -1932,6 +1957,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -2001,6 +2027,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -2046,7 +2073,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -2077,7 +2105,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -2106,7 +2135,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your Shot Put GT table in-place
@@ -2389,6 +2419,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -2458,6 +2489,7 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
         ) %>%
+        opt_table_font(font = "Helvetica") %>% 
         text_transform(
           locations = cells_body(columns = Value),
           fn = function(x) {
@@ -2503,7 +2535,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
       
     } else {
       # Case: Only 1 month but not May 2024
@@ -2534,7 +2567,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
           table.border.top.style = "hidden",
           table.border.bottom.style = "hidden",
           data_row.padding = px(4)
-        )
+        ) %>% 
+        opt_table_font(font = "Helvetica")
     }
     
   } else {
@@ -2563,7 +2597,8 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
         table.border.top.style = "hidden",
         table.border.bottom.style = "hidden",
         data_row.padding = px(4)
-      )
+      ) %>% 
+      opt_table_font(font = "Helvetica")
   }
   
   # 1. Composite your Extension/Flexion GT table in-place
