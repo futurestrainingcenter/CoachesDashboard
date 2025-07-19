@@ -3691,8 +3691,8 @@ server <- function(input, output, session) {
       paste0(input$report_athlete_name, " Pitching Report.png")
     },
     content = function(file) {
-      waitress_pitching$start()
-      on.exit(waitress_pitching$close(), add = TRUE)
+      report_waiter$show()
+      on.exit(report_waiter$hide(), add = TRUE)
       
       report_path <- generate_pitching_report(
         client_data    = client_data,
@@ -3712,8 +3712,8 @@ server <- function(input, output, session) {
       paste0(input$report_athlete_name, " Strength Report.png")
     },
     content = function(file) {
-      waitress_strength$start()
-      on.exit(waitress_strength$close(), add = TRUE)
+      report_waiter$show()
+      on.exit(report_waiter$hide(), add = TRUE)
       
       report_path <- generate_strength_report(
         client_data   = client_data,
@@ -3732,8 +3732,8 @@ server <- function(input, output, session) {
       paste0(input$report_athlete_name, " Speed Report.png")
     },
     content = function(file) {
-      waitress_speed$start()
-      on.exit(waitress_speed$close(), add = TRUE)
+      report_waiter$show()
+      on.exit(report_waiter$hide(), add = TRUE)
       
       report_path <- generate_speed_report(
         client_data = client_data,

@@ -1,0 +1,51 @@
+# R session and history files
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+
+# RStudio project files
+.Rproj.user/
+*.Rproj
+
+# Shiny deployment folder (if using rsconnect)
+rsconnect/
+
+# Environment and credential files
+.env
+.Renviron
+*.pem
+*.key
+*.sqlite
+
+# MacOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# VSCode or other editor folders
+.vscode/
+.idea/
+
+# Logs and reports
+*.log
+*.pdf
+*.html
+*.png
+*.jpg
+*.jpeg
+*.svg
+
+# Temporary files and caches
+*.tmp
+*.bak
+*.swp
+*~
+
+# Output folders (optional)
+output/
+cache/
+.Rhistory
