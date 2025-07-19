@@ -313,10 +313,10 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
     theme_void()
   
   # 1. Render & save the player profile plot
-  summary_path <- file.path(athlete_dir, paste0(athlete, "-playerProfile.png"))
-  ggsave(summary_path,
+  profile_path <- file.path(athlete_dir, paste0(athlete, "_playerProfile.png"))
+  ggsave(profile_path,
          plot   = player_profile,
-         height = 2.5,
+         width  = 8, height = 2.5,
          units  = "in",
          dpi    = 150)
   

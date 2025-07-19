@@ -10,29 +10,6 @@
     "has_parameters": false
   },
   "packages": {
-    "AsioHeaders": {
-      "Source": "CRAN",
-      "Repository": "https://cran.rstudio.com",
-      "description": {
-        "Package": "AsioHeaders",
-        "Type": "Package",
-        "Title": "'Asio' C++ Header Files",
-        "Version": "1.22.1-2",
-        "Date": "2022-12-07",
-        "Author": "Dirk Eddelbuettel",
-        "Maintainer": "Dirk Eddelbuettel <edd@debian.org>",
-        "Description": "'Asio' is a cross-platform C++ library for network and low-level\n I/O programming that provides developers with a consistent asynchronous model\n using a modern C++ approach. It is also included in Boost but requires linking\n when used with Boost. Standalone it can be used header-only (provided a recent\n compiler). 'Asio' is written and maintained by Christopher M. Kohlhoff, and\n released under the 'Boost Software License', Version 1.0.",
-        "Copyright": "file inst/COPYRIGHTS",
-        "License": "BSL-1.0",
-        "URL": "https://github.com/eddelbuettel/asioheaders,\nhttps://dirk.eddelbuettel.com/code/asioheaders.html",
-        "BugReports": "https://github.com/eddelbuettel/asioheaders/issues",
-        "NeedsCompilation": "no",
-        "Packaged": "2022-12-08 04:04:23 UTC; edd",
-        "Repository": "CRAN",
-        "Date/Publication": "2022-12-08 08:12:34 UTC",
-        "Built": "R 4.3.0; ; 2023-04-05 23:09:56 UTC; unix"
-      }
-    },
     "BH": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -896,35 +873,6 @@
         "Repository": "CRAN",
         "Date/Publication": "2016-07-27 03:17:48",
         "Built": "R 4.3.0; ; 2023-04-11 04:45:54 UTC; unix"
-      }
-    },
-    "chromote": {
-      "Source": "CRAN",
-      "Repository": "https://cran.rstudio.com",
-      "description": {
-        "Package": "chromote",
-        "Title": "Headless Chrome Web Browser Interface",
-        "Version": "0.3.1",
-        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", , \"winston@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Barret\", \"Schloerke\", , \"barret@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0001-9986-114X\")),\n    person(\"Garrick\", \"Aden-Buie\", , \"garrick@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0002-7111-0077\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
-        "Description": "An implementation of the 'Chrome DevTools Protocol', for\n    controlling a headless Chrome web browser.",
-        "License": "GPL-2",
-        "URL": "https://rstudio.github.io/chromote/,\nhttps://github.com/rstudio/chromote",
-        "BugReports": "https://github.com/rstudio/chromote/issues",
-        "Imports": "curl, fastmap, jsonlite, later (>= 1.1.0), magrittr, processx,\npromises (>= 1.1.1), R6, rlang, utils, websocket (>= 1.2.0)",
-        "Suggests": "showimage, testthat (>= 3.0.0)",
-        "Config/Needs/website": "tidyverse/tidytemplate",
-        "Config/testthat/edition": "3",
-        "Encoding": "UTF-8",
-        "Language": "en-US",
-        "RoxygenNote": "7.3.2",
-        "SystemRequirements": "Google Chrome or other Chromium-based browser.\nchromium: chromium (rpm) or chromium-browser (deb)",
-        "NeedsCompilation": "no",
-        "Packaged": "2024-08-29 17:52:08 UTC; garrick",
-        "Author": "Winston Chang [aut, cre],\n  Barret Schloerke [aut] (<https://orcid.org/0000-0001-9986-114X>),\n  Garrick Aden-Buie [aut] (<https://orcid.org/0000-0002-7111-0077>),\n  Posit Software, PBC [cph, fnd]",
-        "Maintainer": "Winston Chang <winston@posit.co>",
-        "Repository": "CRAN",
-        "Date/Publication": "2024-08-30 07:10:02 UTC",
-        "Built": "R 4.3.3; ; 2024-08-30 09:51:32 UTC; unix"
       }
     },
     "cli": {
@@ -4622,59 +4570,6 @@
         "Built": "R 4.3.1; ; 2024-04-24 20:34:32 UTC; unix"
       }
     },
-    "shinycssloaders": {
-      "Source": "CRAN",
-      "Repository": "https://cran.rstudio.com",
-      "description": {
-        "Package": "shinycssloaders",
-        "Title": "Add Loading Animations to a 'shiny' Output While It's\nRecalculating",
-        "Version": "1.1.0",
-        "Authors@R": "c(\n    person(\"Dean\",\"Attali\",email=\"daattali@gmail.com\",role=c(\"aut\",\"cre\"),\n        comment = c(\"Maintainer/developer of shinycssloaders since 2019\", ORCID=\"0000-0002-5645-3493\")),\n    person(\"Andras\",\"Sali\",email=\"andras.sali@alphacruncher.hu\",role=c(\"aut\"),comment=\"Original creator of shinycssloaders package\"),\n    person(\"Luke\",\"Hass\",role=c(\"ctb\",\"cph\"),comment=\"Author of included CSS loader code\")\n    )",
-        "Description": "When a 'Shiny' output (such as a plot, table, map, etc.) is recalculating, it remains \n    visible but gets greyed out. Using 'shinycssloaders', you can add a loading animation (\"spinner\")\n    to outputs instead. By wrapping a 'Shiny' output in 'withSpinner()', a spinner will automatically\n    appear while the output is recalculating. You can also manually show and hide the spinner, or add\n    a full-page spinner to cover the entire page.\n    See the demo online at <https://daattali.com/shiny/shinycssloaders-demo/>.",
-        "License": "MIT + file LICENSE",
-        "URL": "https://github.com/daattali/shinycssloaders,\nhttps://daattali.com/shiny/shinycssloaders-demo/",
-        "BugReports": "https://github.com/daattali/shinycssloaders/issues",
-        "Depends": "R (>= 3.1)",
-        "Imports": "digest, glue, grDevices, htmltools (>= 0.3.5), shiny",
-        "Suggests": "knitr, shinydisconnect, shinyjs",
-        "RoxygenNote": "7.2.3",
-        "Encoding": "UTF-8",
-        "NeedsCompilation": "no",
-        "Packaged": "2024-07-30 18:52:48 UTC; Dean",
-        "Author": "Dean Attali [aut, cre] (Maintainer/developer of shinycssloaders since\n    2019, <https://orcid.org/0000-0002-5645-3493>),\n  Andras Sali [aut] (Original creator of shinycssloaders package),\n  Luke Hass [ctb, cph] (Author of included CSS loader code)",
-        "Maintainer": "Dean Attali <daattali@gmail.com>",
-        "Repository": "CRAN",
-        "Date/Publication": "2024-07-30 22:30:02 UTC",
-        "Built": "R 4.3.3; ; 2024-07-31 00:28:52 UTC; unix"
-      }
-    },
-    "shinyjs": {
-      "Source": "CRAN",
-      "Repository": "https://cran.rstudio.com",
-      "description": {
-        "Package": "shinyjs",
-        "Title": "Easily Improve the User Experience of Your Shiny Apps in Seconds",
-        "Version": "2.1.0",
-        "Authors@R": "person(\"Dean\", \"Attali\", \n    email = \"daattali@gmail.com\",\n    role = c(\"aut\", \"cre\"),\n    comment= c(ORCID=\"0000-0002-5645-3493\"))",
-        "Description": "Perform common useful JavaScript operations in Shiny apps that will\n    greatly improve your apps without having to know any JavaScript. Examples\n    include: hiding an element, disabling an input, resetting an input back to\n    its original value, delaying code execution by a few seconds, and many more\n    useful functions for both the end user and the developer. 'shinyjs' can also\n    be used to easily call your own custom JavaScript functions from R.",
-        "URL": "https://deanattali.com/shinyjs/",
-        "BugReports": "https://github.com/daattali/shinyjs/issues",
-        "Depends": "R (>= 3.1.0)",
-        "Imports": "digest (>= 0.6.8), jsonlite, shiny (>= 1.0.0)",
-        "Suggests": "htmltools (>= 0.2.9), knitr (>= 1.7), rmarkdown, shinyAce,\nshinydisconnect, testthat (>= 0.9.1)",
-        "License": "MIT + file LICENSE",
-        "VignetteBuilder": "knitr",
-        "RoxygenNote": "7.1.1",
-        "Encoding": "UTF-8",
-        "NeedsCompilation": "no",
-        "Packaged": "2021-12-21 11:32:22 UTC; Dean-X1C",
-        "Author": "Dean Attali [aut, cre] (<https://orcid.org/0000-0002-5645-3493>)",
-        "Maintainer": "Dean Attali <daattali@gmail.com>",
-        "Repository": "CRAN",
-        "Date/Publication": "2021-12-23 10:10:02 UTC",
-        "Built": "R 4.3.0; ; 2023-04-11 04:49:20 UTC; unix"
-      }
-    },
     "showtext": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -5342,60 +5237,31 @@
         "Archs": "vroom.so.dSYM"
       }
     },
-    "webshot2": {
+    "waiter": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
       "description": {
-        "Package": "webshot2",
-        "Title": "Take Screenshots of Web Pages",
-        "Version": "0.1.1",
-        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", , \"winston@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Barret\", \"Schloerke\", , \"barret@posit.co\", role = \"ctb\",\n           comment = c(ORCID = \"0000-0001-9986-114X\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
-        "Description": "Takes screenshots of web pages, including Shiny applications\n    and R Markdown documents. 'webshot2' uses headless Chrome or Chromium\n    as the browser back-end.",
-        "License": "GPL-2",
-        "URL": "https://rstudio.github.io/webshot2/,\nhttps://github.com/rstudio/webshot2",
-        "BugReports": "https://github.com/rstudio/webshot2/issues",
-        "Depends": "R (>= 3.2)",
-        "Imports": "callr, chromote (>= 0.1.0), later, magrittr, promises",
-        "Suggests": "httpuv, rmarkdown, shiny",
+        "Package": "waiter",
+        "Title": "Loading Screen for 'Shiny'",
+        "Version": "0.2.5",
+        "Date": "2022-01-02",
+        "Authors@R": "c(\n    person(given = \"John\",\n           family = \"Coene\",\n           role = c(\"aut\", \"cre\"),\n           email = \"jcoenep@gmail.com\"),\n    person(given = \"Jinhwan\",\n           family = \"Kim\",\n           role = \"ctb\",\n           email = 'hwanistic@gmail.com'),\n    person(given = \"Victor\",\n           family = \"Granda\",\n           role = c(\"ctb\"),\n           email = \"victorgrandagarcia@gmail.com\",\n           comment = c(ORCID = \"0000-0002-0469-1991\")))",
+        "Description": "Full screen and partial loading screens for 'Shiny' with spinners, progress bars, and notifications.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://waiter.john-coene.com/,\nhttps://github.com/JohnCoene/waiter",
+        "BugReports": "https://github.com/JohnCoene/waiter/issues",
         "Encoding": "UTF-8",
-        "Language": "en-US",
-        "RoxygenNote": "7.2.3",
-        "NeedsCompilation": "no",
-        "Packaged": "2023-08-11 21:17:46 UTC; garrick",
-        "Author": "Winston Chang [aut, cre],\n  Barret Schloerke [ctb] (<https://orcid.org/0000-0001-9986-114X>),\n  Posit Software, PBC [cph, fnd]",
-        "Maintainer": "Winston Chang <winston@posit.co>",
-        "Repository": "CRAN",
-        "Date/Publication": "2023-08-11 22:00:02 UTC",
-        "Built": "R 4.3.0; ; 2023-08-11 23:00:46 UTC; unix"
-      }
-    },
-    "websocket": {
-      "Source": "CRAN",
-      "Repository": "https://cran.rstudio.com",
-      "description": {
-        "Package": "websocket",
-        "Version": "1.4.2",
-        "Title": "'WebSocket' Client Library",
-        "Description": "Provides a 'WebSocket' client interface for R.\n    'WebSocket' is a protocol for low-overhead real-time communication:\n    <https://en.wikipedia.org/wiki/WebSocket>.",
-        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", role = c(\"aut\", \"cre\"), email = \"winston@posit.co\"),\n    person(\"Joe\", \"Cheng\", role = \"aut\", email = \"joe@posit.co\"),\n    person(\"Alan\", \"Dipert\", role = \"aut\"),\n    person(\"Barbara\", \"Borges\", role = \"aut\"),\n    person(family = \"Posit, PBC\", role = \"cph\"),\n    person(\"Peter\", \"Thorson\", role = c(\"ctb\", \"cph\"), comment = \"WebSocket++ library\"),\n    person(\"René\", \"Nyffenegger\", role = c(\"ctb\", \"cph\"), comment = \"Base 64 library\"),\n    person(\"Micael\", \"Hildenborg\", role = c(\"ctb\", \"cph\"), comment = \"SHA1 library\"),\n    person(family = \"Aladdin Enterprises\", role = \"cph\", comment = \"MD5 library\"),\n    person(\"Bjoern\", \"Hoehrmann\", role = c(\"ctb\", \"cph\"), comment = \"UTF8 Validation library\"))",
-        "License": "GPL-2",
-        "Encoding": "UTF-8",
-        "ByteCompile": "true",
-        "Imports": "R6, later (>= 1.2.0)",
-        "LinkingTo": "cpp11, AsioHeaders, later",
-        "BugReports": "https://github.com/rstudio/websocket/issues",
-        "SystemRequirements": "GNU make, OpenSSL >= 1.0.2",
-        "RoxygenNote": "7.3.2",
-        "Suggests": "httpuv, testthat, knitr, rmarkdown",
+        "Imports": "R6, shiny, htmltools",
+        "RoxygenNote": "7.1.2",
+        "Suggests": "httr, knitr, packer, rmarkdown",
         "VignetteBuilder": "knitr",
-        "NeedsCompilation": "yes",
-        "Packaged": "2024-07-22 17:16:18 UTC; winston",
-        "Author": "Winston Chang [aut, cre],\n  Joe Cheng [aut],\n  Alan Dipert [aut],\n  Barbara Borges [aut],\n  Posit, PBC [cph],\n  Peter Thorson [ctb, cph] (WebSocket++ library),\n  René Nyffenegger [ctb, cph] (Base 64 library),\n  Micael Hildenborg [ctb, cph] (SHA1 library),\n  Aladdin Enterprises [cph] (MD5 library),\n  Bjoern Hoehrmann [ctb, cph] (UTF8 Validation library)",
-        "Maintainer": "Winston Chang <winston@posit.co>",
+        "NeedsCompilation": "no",
+        "Packaged": "2022-01-03 13:33:14 UTC; john",
+        "Author": "John Coene [aut, cre],\n  Jinhwan Kim [ctb],\n  Victor Granda [ctb] (<https://orcid.org/0000-0002-0469-1991>)",
+        "Maintainer": "John Coene <jcoenep@gmail.com>",
         "Repository": "CRAN",
-        "Date/Publication": "2024-07-22 22:20:01 UTC",
-        "Built": "R 4.3.3; aarch64-apple-darwin20; 2024-07-23 00:06:51 UTC; unix",
-        "Archs": "websocket.so.dSYM"
+        "Date/Publication": "2022-01-03 14:30:02 UTC",
+        "Built": "R 4.3.0; ; 2023-04-11 04:50:00 UTC; unix"
       }
     },
     "withr": {
@@ -5571,46 +5437,46 @@
       "checksum": "05bdb783ee6514c8c072e47680af8ff7"
     },
     "ClientData.rds": {
-      "checksum": "e95e5a4c1b779c12b0445e031e1dcd04"
+      "checksum": "f48338441d7ac456427685b630c32784"
     },
     "HittingFacilityData.rds": {
-      "checksum": "c8af58a8ae37e6d3fee96b55eebf654e"
+      "checksum": "790316708c1657c1de419a660470e2ee"
     },
     "HittingReport.R": {
-      "checksum": "6d3839edfebc8851b0db1e2c5a8b9734"
+      "checksum": "349c22a8cc7d95f1c4f6e14382d4a8cb"
     },
     "HittraxData.rds": {
-      "checksum": "6f7e5afc1578ab2edf033d451d7a8f63"
+      "checksum": "46e261776197fec56e2230c1579ce283"
     },
     "PitchingFacilityData.rds": {
-      "checksum": "05f63321cac6d44b1c44f64d1308e899"
+      "checksum": "c63d09d219f446661e051de80f5dc03c"
     },
     "PitchingReport.R": {
-      "checksum": "2029ea48216e78b9b47aa5d9b0381134"
+      "checksum": "9f1ac2881f307f053ed65da5d5a05f39"
     },
     "README.md": {
       "checksum": "cc4c8b01b9f138bb944184d0797c7d4b"
     },
     "server.R": {
-      "checksum": "adf1f74af63b1f5f31c9ad4c2768aa14"
+      "checksum": "47feba4967d5e11d3a5648175e6d914a"
     },
     "SpeedFacilityData.rds": {
-      "checksum": "a34d6c2758474c0a8be018c1e0686178"
+      "checksum": "ba28632e5e2733f2161101508558e95e"
     },
     "SpeedReport.R": {
-      "checksum": "e19ec4df4e15e6a9b4fc40816ba80ce4"
+      "checksum": "fc818b081283f7db4707773b844fec5e"
     },
     "StrengthFacilityData.rds": {
-      "checksum": "31b8afbe21defd19d229ec1622977494"
+      "checksum": "b3825d498ffdc48bf68e052c78a12b4a"
     },
     "StrengthReport.R": {
-      "checksum": "d6e3f80259442138f2cca7d9876891e9"
+      "checksum": "5fb835ba69c58f03444f0f97c12a1be7"
     },
     "TrackmanData.rds": {
-      "checksum": "ba28725c6736185d9c315b18e44b4991"
+      "checksum": "be6c3d2e55f518d954bbc0f37e1f3f3c"
     },
     "ui.R": {
-      "checksum": "07462cc70e766137aaec1ad31531b65a"
+      "checksum": "38bc4c0a7a3cfe67d828c34d5d59b34e"
     },
     "www/black_logo.png": {
       "checksum": "1b1699c232fda02827820ea9cef2d56a"
@@ -5730,7 +5596,7 @@
       "checksum": "a85a367c3f75448e5b45539b05477aff"
     },
     "www/Strength Report Template.pdf": {
-      "checksum": "cb3141e8534e81f5915c212ae72ea2e8"
+      "checksum": "f3f2e59b8174e28ad2dbf3b4c0420e62"
     },
     "www/white_logo.png": {
       "checksum": "0ced1148a5016f23c2c836e308f364ee"

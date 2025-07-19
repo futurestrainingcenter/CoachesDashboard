@@ -4,37 +4,24 @@ library(tidyverse)
 library(plotly)
 library(reactable)
 library(shinyWidgets)
-library(shinycssloaders)
-library(shinyjs)
+library(waiter)
 library(gt)
 
 ui <- tagList(
-  useShinyjs(),  # enable shinyjs functionality
-  
-  tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"),
-  
-  # ───── Loading Spinner ─────
-  tags$div(
-    id = "loading_screen",
-    style = "
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: white;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    ",
-    tags$img(src = "spinner.gif", height = "100px"),
-    tags$h3("Loading data...")
+  useWaiter(),
+  useWaitress(),
+  waiterPreloader(
+    html = tagList(
+      spin_loaders(id = 19, color = "black", style = NULL),
+      tags$h3("Loading data...", style = "margin-top: 20px; color: black;")
+    ),
+    color = "white"
   ),
+
+  tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"),
   
   # ───── Main UI (hidden until data loads) ─────
   tags$div(
-    id = "main_ui",
-    style = "display: none;",  # initially hidden
     page_navbar(
       title = tags$a(
         href = "#",
@@ -512,10 +499,10 @@ ui <- tagList(
                   div(
                     style = "display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;",
                     uiOutput("leaderboard_date_range_ui"),
-                    uiOutput("leaderboard_level_ui"),
-                    uiOutput("leaderboard_gender_ui")
+                    uiOutput("leaderboard_gender_ui"),
+                    uiOutput("leaderboard_level_ui")
                   ),
-                  
+
                   # ── Reactable Output ──
                   div(
                     style = "display: flex; justify-content: center; margin-top: 20px;",
@@ -524,8 +511,45 @@ ui <- tagList(
                 )
       ),
       
+      nav_panel("Percentiles",
+                div(
+                  style = "padding: 20px 10px; max-width: 1400px; margin: 0 auto; text-align: center;",
+                  
+                  # ── Title + Department Picker ──
+                  div(
+                    style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;",
+                    tags$h2("Percentile Distributions", style = "margin: 0;"),
+                    div(
+                      style = "margin-top: 20px;",
+                      pickerInput(
+                        inputId = "percentile_department",
+                        label   = NULL,
+                        choices = c("Hitting", "Pitching", "Strength", "Speed"),
+                        selected= "Hitting",
+                        multiple= FALSE
+                      )
+                    )
+                  ),
+                  
+                  # ── Filters: Metric, Level(s), Gender ──
+                  div(
+                    style = "display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;",
+                    uiOutput("metric_selector"),            # same pattern as your other panels
+                    uiOutput("percentile_gender_ui"),       # wrap your gender picker in a UI output
+                    uiOutput("percentile_levels_ui")        # wrap your level picker in a UI output
+                  ),
+                  
+                  # ── Plot Output ──
+                  div(
+                    style = "display: flex; justify-content: center; margin-top: 20px;",
+                    plotlyOutput("percentile_plot", height = "500px", width = "1260px")
+                  )
+                )
+      ),
+      
       nav_panel("Reports",
                 div(
+                  id   = "report_card",
                   class = "mx-auto px-4",
                   style = "display: flex; justify-content: center;",
                   card(
@@ -562,55 +586,7 @@ ui <- tagList(
                     )
                   )
                 )
-      ),
-      
-      
-
-      # nav_panel("Percentile Calculator",
-      #           div(class = "mx-auto px-4",
-      #               
-      #               card(class = "p-4 shadow-sm",
-      #                    div(style = "min-height: 375px;",
-      #                        
-      #                        # Header
-      #                        card_header(
-      #                          h3("Find Your Strength Percentile", class = "text-center mb-4")
-      #                        ),
-      #                        
-      #                        # Add top margin between header and inputs
-      #                        div(style = "margin-top: 1.5rem;",
-      #                            
-      #                            # Input selectors
-      #                            layout_columns(
-      #                              col_widths = c(4, 4, 4),
-      #                              selectInput("percentile_exercise", "Exercise:",
-      #                                          choices = c("IBSQT", "CMJ", "SHLDISOY", "Dynamo - Trunk", "External Rotation",
-      #                                                      "Internal Rotation", "ChestPress", "D2Ext", "D2Flex",
-      #                                                      "HorizontalRow", "ShotPut", "TrunkRotation", "ProteusFullTest"),
-      #                                          selected = NULL),
-      #                              selectInput("percentile_level", "Level:",
-      #                                          choices = c("L1", "L2", "L3", "Collegiate", "Professional"),
-      #                                          selected = NULL),
-      #                              selectInput("percentile_gender", "Gender:",
-      #                                          choices = c("Male", "Female"),
-      #                                          selected = NULL)
-      #                            ),
-      #                            
-      #                            # Result input and button
-      #                            layout_columns(
-      #                              col_widths = c(8, 4),
-      #                              numericInput("percentile_result", "Your Result:", value = NA, min = 0),
-      #                              div(class = "mt-4",
-      #                                  actionButton("get_percentile", "Get Percentile", class = "btn btn-primary w-100"))
-      #                            ),
-      #                            
-      #                            # Output
-      #                            uiOutput("percentile_output")
-      #                        )
-      #                    )
-      #               )
-      #           )
-      # )
+      )
     ),
     
     tags$footer(

@@ -29,12 +29,6 @@ server <- function(input, output, session) {
   speed_data     <- readRDS("SpeedFacilityData.rds")
   client_data    <- readRDS("ClientData.rds")
   
-  # Once done, show the main UI and hide loading screen
-  observe({
-    shinyjs::hide("loading_screen")
-    shinyjs::show("main_ui")
-  })
-  
   # ── Facility dropdowns ───────────────────────────────────────────
   
   output$facility_date_range_ui <- renderUI({
@@ -50,7 +44,7 @@ server <- function(input, output, session) {
     )
     req(data)
     dateRangeInput("facility_date_range", "Select Date Range:",
-                   start = Sys.Date() %m-% months(6), end = Sys.Date())
+                   start = Sys.Date() %m-% months(6), end = Sys.Date(), width = '280px')
   })
   
   output$facility_level_ui <- renderUI({
@@ -3476,22 +3470,161 @@ server <- function(input, output, session) {
     )
   })
   
+# Percentile Distributions ------------------------------------------------
+
+  observeEvent(input$percentile_department, {
+    metric_choices <- switch(input$percentile_department,
+                             "Hitting"   = c("Max EV" = "MaxVel", "Avg EV" = "AvgVel", "Max Dist" = "MaxDist", "Avg Dist" = "AvgDist", "Bat Speed" = "bat_speed", "Rotational Acceleration" = "rotational_acceleration"),
+                             "Pitching"  = c("Max FB" = "Max_RelSpeed", "Avg FB" = "Avg_RelSpeed", "FB Extension" = "Extension"),
+                             "Strength"  = c("IBSQT", "CMJ", "SHLDISOY", "Trunk Rotation" = "TrunkRotation", "Shot Put" = "ShotPut", "D2 Ext/Flex" = "D2Average"),
+                             "Speed"     = c("Early Acceleration" = "early_acceleration", "Late Acceleration" = "late_acceleration", "30 Yard" = "thirty_yard", "40 Yard" = "forty_yard", "Top Speed" = "max_velocity"),
+                             character(0)
+    )
+    
+    output$metric_selector <- renderUI({
+      selectInput("percentile_metric", "Select Metric:", choices = metric_choices, selected = metric_choices[1])
+    })
+  })
+  
+  output$percentile_levels_ui <- renderUI({
+    pickerInput("percentile_levels", "Select Level:",
+                choices = c("L1", "L2", "L3", "Collegiate", "Professional"),
+                selected = c("L3", "Collegiate"),
+                multiple = TRUE,
+                options = list('max-options' = 2))
+  })
+  
+  output$percentile_gender_ui <- renderUI({
+    req(input$percentile_department)
+    if (input$percentile_department != "Pitching") {
+      selectInput("percentile_gender", "Select Gender:",
+                  choices = c("Male", "Female", "All"),
+                  selected = "Male")
+    }
+  })
+  
+  get_filtered_data <- reactive({
+    req(input$percentile_department, input$percentile_metric, input$percentile_gender, input$percentile_levels)
+    
+    # pick the right data
+    df <- switch(input$percentile_department,
+                 "Hitting"   = hitting_data,
+                 "Pitching"  = pitching_data %>% filter(TaggedPitchType=="Fastball"),
+                 "Strength"  = strength_data,
+                 "Speed"     = speed_data)
+    
+    # make sure the metric is valid for this df
+    req(input$percentile_metric %in% names(df))
+    
+    df %>%
+      filter(
+        Gender %in% input$percentile_gender,
+        Level  %in% input$percentile_levels,
+        !is.na(.data[[input$percentile_metric]])
+      ) %>%
+      mutate(Value = .data[[input$percentile_metric]])
+  })
+  
+  output$percentile_plot <- renderPlotly({
+    req(get_filtered_data())
+    df      <- get_filtered_data()
+    levels  <- unique(df$Level)
+    
+    # which of your metrics are "time" metrics?
+    timed_metrics <- c("early_acceleration", "late_acceleration", "thirty_yard", "forty_yard")
+    is_timed <- input$percentile_metric %in% timed_metrics
+    
+    level_colors <- c(
+      L1           = "#1f77b4",
+      L2           = "#ff7f0e",
+      L3           = "#2ca02c",
+      Collegiate   = "#d62728",
+      Professional = "#9467bd"
+    )
+    
+    plot <- plot_ly()
+    for (lvl in levels) {
+      level_df <- df %>% filter(Level == lvl)
+      if (nrow(level_df) > 1) {
+        d       <- density(level_df$Value)
+        F_ecdf  <- ecdf(level_df$Value)
+        # raw percentile
+        pct_raw <- F_ecdf(d$x) * 100
+        # if time metric, invert so that smaller values → higher percentile
+        pct     <- if (is_timed) 100 - pct_raw else pct_raw
+        
+        clr <- level_colors[lvl]
+        plot <- plot %>%
+          add_trace(
+            x           = d$x,
+            y           = d$y,
+            type        = "scatter",
+            mode        = "lines",
+            name        = lvl,
+            fill        = "tozeroy",
+            line        = list(width = 2, color = clr),
+            fillcolor   = paste0(clr, "33"),
+            customdata  = pct,
+            hovertemplate = paste0(
+              "<b>", lvl, "</b><br>",
+              if (is_timed) "Time: %{x:.2f}s<br>" else "Value: %{x:.2f}<br>",
+              "Percentile: %{customdata:.1f}%<extra></extra>"
+            )
+          )
+      }
+    }
+    
+    plot %>%
+      layout(
+        title    = paste("Percentile Distribution of", input$percentile_metric),
+        xaxis    = list(title = if (is_timed) "Time (s)" else "Value"),
+        yaxis    = list(title = "Density", visible = FALSE),
+        legend   = list(x = 0.1, y = 0.9),
+        hovermode  = 'closest',
+        dragmode   = FALSE
+      ) %>%
+      config(
+        displaylogo           = FALSE,
+        scrollZoom            = FALSE,
+        doubleClick           = FALSE,
+        modeBarButtonsToRemove = c(
+          "zoom2d","pan2d","select2d","lasso2d",
+          "zoomIn2d","zoomOut2d","autoScale2d","resetScale2d",
+          "hoverClosestCartesian","hoverCompareCartesian"
+        ),
+        toImageButtonOptions = list(
+          format   = "png",
+          filename = paste0(input$percentile_metric, "_PercentilePlot"),
+          height   = 600,
+          width    = 900,
+          scale    = 2
+        )
+      )
+  })
   
   # Report Downloader -------------------------------------------------------
-
+  
   # UI: Populate athlete selector from client_data
   output$athlete_selector <- renderUI({
-
-    choices <- client_data %>%
+    athlete_choices <- client_data %>%
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-
-    selectInput("report_athlete_name", "Athlete:",
-                choices = c("Select an Athlete" = "", choices),  # or the relevant name column
-                selected = NULL, width = "100%")
+    
+    pickerInput(
+      inputId  = "report_athlete_name",
+      label    = "Athlete:",
+      choices  = athlete_choices,
+      options  = list(
+        `live-search`           = TRUE,
+        `actions-box`           = FALSE,
+        `size`                  = 5,             # show 5 rows then scroll
+        `none-selected-text`    = 'Type to search…'
+      ),
+      width = "100%"
+    )
   })
-
+  
   # UI: Conditionally show download buttons based on data presence
   output$report_buttons <- renderUI({
     req(input$report_athlete_name, input$report_month, input$report_year)
@@ -3522,179 +3655,96 @@ server <- function(input, output, session) {
     div(style = "display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;", buttons)
   })
   
-
+  # Predefine a custom waiter for report downloads
+  report_waiter <- waiter::Waiter$new(
+    html = tagList(
+      spin_1(), 
+      h3("Generating your report...", style = "margin-top: 20px; color: white;")
+    ),
+    color = "#000000cc"  # semi-transparent black
+  )
+  
+  # Hitting Report
   output$download_hitting_report <- downloadHandler(
     filename = function() {
       paste0(input$report_athlete_name, " Hitting Report.png")
     },
     content = function(file) {
-      report_path <- generate_hitting_report(client_data = client_data, hitting_data = hitting_data, hittrax_data = hittrax_data, 
-                                             input$report_athlete_name, input$report_month, input$report_year)
+      report_waiter$show()
+      on.exit(report_waiter$hide(), add = TRUE)
+      
+      report_path <- generate_hitting_report(
+        client_data  = client_data,
+        hitting_data = hitting_data,
+        hittrax_data = hittrax_data,
+        input$report_athlete_name,
+        input$report_month,
+        input$report_year
+      )
       file.copy(report_path, file)
     }
   )
-
+  
+  # Pitching Report
   output$download_pitching_report <- downloadHandler(
     filename = function() {
       paste0(input$report_athlete_name, " Pitching Report.png")
     },
     content = function(file) {
-      report_path <- generate_pitching_report(client_data = client_data, pitching_data = pitching_data, trackman_data = trackman_data, 
-                                              input$report_athlete_name, input$report_month, input$report_year)
+      waitress_pitching$start()
+      on.exit(waitress_pitching$close(), add = TRUE)
+      
+      report_path <- generate_pitching_report(
+        client_data    = client_data,
+        pitching_data  = pitching_data,
+        trackman_data  = trackman_data,
+        input$report_athlete_name,
+        input$report_month,
+        input$report_year
+      )
       file.copy(report_path, file)
     }
   )
-
+  
+  # Strength Report
   output$download_strength_report <- downloadHandler(
     filename = function() {
       paste0(input$report_athlete_name, " Strength Report.png")
     },
     content = function(file) {
-      report_path <- generate_strength_report(client_data = client_data, strength_data = strength_data, 
-                                              input$report_athlete_name, input$report_month, input$report_year)
+      waitress_strength$start()
+      on.exit(waitress_strength$close(), add = TRUE)
+      
+      report_path <- generate_strength_report(
+        client_data   = client_data,
+        strength_data = strength_data,
+        input$report_athlete_name,
+        input$report_month,
+        input$report_year
+      )
       file.copy(report_path, file)
     }
   )
-
+  
+  # Speed Report
   output$download_speed_report <- downloadHandler(
     filename = function() {
       paste0(input$report_athlete_name, " Speed Report.png")
     },
     content = function(file) {
-      report_path <- generate_speed_report(client_data = client_data, speed_data = speed_data, 
-                                           input$report_athlete_name, input$report_month, input$report_year)
+      waitress_speed$start()
+      on.exit(waitress_speed$close(), add = TRUE)
+      
+      report_path <- generate_speed_report(
+        client_data = client_data,
+        speed_data  = speed_data,
+        input$report_athlete_name,
+        input$report_month,
+        input$report_year
+      )
       file.copy(report_path, file)
     }
   )
-  
-
-# Percentile Calculator ---------------------------------------------------
-
-  
-  # percentile_result_data <- eventReactive(input$get_percentile, {
-  #   req(input$percentile_exercise, input$percentile_level, input$percentile_gender, !is.na(input$percentile_result), input$percentile_result > 0)
-  # 
-  #   exercise_col <- input$percentile_exercise
-  #   col_sym <- rlang::sym(exercise_col)
-  # 
-  #   # 1. User row
-  #   athlete_data <- tibble(
-  #     Name   = "User",
-  #     Level  = input$percentile_level,
-  #     Gender = input$percentile_gender,
-  #     !!exercise_col := as.numeric(input$percentile_result)
-  #   )
-  # 
-  #   # 2. Raw facility data for the same level/gender (do not summarise)
-  #   raw_facility_data <- strength_data %>%
-  #     filter(
-  #       Level == input$percentile_level,
-  #       Gender == input$percentile_gender,
-  #       !is.na(.data[[exercise_col]])
-  #     ) %>%
-  #     mutate(Value = .data[[exercise_col]])
-  # 
-  #   # 3. Compute ECDF-based percentile for the athlete's result
-  #   ecdf_func <- ecdf(raw_facility_data$Value)
-  #   athlete_percentile <- round(ecdf_func(as.numeric(input$percentile_result)) * 100)
-  # 
-  #   # 4. Return result + calculated percentile
-  #   athlete_data %>%
-  #     mutate(Percentile = athlete_percentile) %>%
-  #     select(Level, Gender, Result = !!col_sym, Percentile)
-  # })
-  # 
-  # output$percentile_plot <- renderPlotly({
-  #   req(percentile_result_data(), input$percentile_exercise)
-  # 
-  #   exercise_col <- input$percentile_exercise
-  #   user_value <- percentile_result_data()$Result
-  # 
-  #   # Filter valid data
-  #   plot_data <- strength_data %>%
-  #     filter(
-  #       Level == input$percentile_level,
-  #       Gender == input$percentile_gender,
-  #       !is.na(.data[[exercise_col]])
-  #     ) %>%
-  #     mutate(Value = .data[[exercise_col]])
-  # 
-  #   # Compute density
-  #   density_data <- density(plot_data$Value, na.rm = TRUE)
-  #   density_df <- tibble(x = density_data$x, y = density_data$y)
-  # 
-  #   plot_ly(
-  #     data = density_df,
-  #     x = ~x,
-  #     y = ~y,
-  #     type = 'scatter',
-  #     mode = 'lines',
-  #     fill = 'tozeroy',
-  #     line = list(color = '#0073C2'),
-  #     hovertemplate = paste(
-  #       "Value: %{x:.1f}<br>",
-  #       "Percentile: %{customdata:.0f}%",
-  #       "<extra></extra>"
-  #     ),
-  #     customdata = map_dbl(density_df$x, function(v) {
-  #       round(ecdf(plot_data$Value)(v) * 100)
-  #     })
-  #   ) %>%
-  #     layout(
-  #       margin = list(l = 40, r = 20, t = 20, b = 50),
-  #       xaxis = list(title = "Result", titlefont = list(size = 14)),
-  #       yaxis = list(visible = FALSE),
-  #       shapes = list(
-  #         list(
-  #           type = "line",
-  #           x0 = user_value, x1 = user_value,
-  #           y0 = 0, y1 = 1,
-  #           xref = "x", yref = "paper",
-  #           line = list(color = "red", width = 2, dash = "dash")
-  #         )
-  #       )
-  #     ) %>% 
-  #     config(
-  #       displaylogo           = FALSE,
-  #       scrollZoom            = FALSE,
-  #       doubleClick           = FALSE,
-  #       modeBarButtonsToRemove = c(
-  #         "zoom2d","pan2d","select2d","lasso2d",
-  #         "zoomIn2d","zoomOut2d","autoScale2d","resetScale2d",
-  #         "hoverClosestCartesian","hoverCompareCartesian"
-  #       ),
-  #       toImageButtonOptions = list(
-  #         format   = "png",
-  #         filename = paste0("PercentilePlot"),
-  #         height   = 600,
-  #         width    = 900,
-  #         scale    = 2
-  #       )
-  #     )
-  # })
-  # 
-  # output$percentile_output <- renderUI({
-  #   req(percentile_result_data())
-  #   result <- percentile_result_data()
-  #   
-  #   percentile_color <- scales::col_numeric(
-  #     palette = c("#FF0000", "#FFFF00", "#008000"),  # red → yellow → green
-  #     domain = c(0, 100)
-  #   )(result$Percentile)
-  #   
-  #   tags$div(
-  #     class = "mt-4 p-3 border rounded",
-  #     style = "background-color: #f8f9fa;",  # Light gray background for subtle emphasis
-  #     
-  #     tags$p(HTML(sprintf(
-  #       "Your result: <strong>%.1f</strong><br>
-  #      Percentile: <strong style='color:%s;'>%d%%</strong>",
-  #       result$Result, percentile_color, result$Percentile
-  #     ))),
-  #     
-  #     plotlyOutput("percentile_plot", height = "350px")
-  #   )
-  # })
 }
 
 shinyServer(server)

@@ -376,11 +376,11 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
     
     theme_void()
   
-  # 1. Render & save the player profile plot
-  summary_path <- file.path(athlete_dir, paste0(athlete, "-playerProfile.png"))
-  ggsave(summary_path,
+  # 1. Render & save the profile plot
+  profile_path <- file.path(athlete_dir, paste0(athlete, "_playerProfile.png"))
+  ggsave(profile_path,
          plot   = player_profile,
-         height = 2.5,
+         width  = 8, height = 2.5,
          units  = "in",
          dpi    = 150)
   
