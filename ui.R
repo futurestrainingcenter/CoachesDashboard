@@ -1,8 +1,11 @@
+# ui.R
+
 library(shiny)
 library(bslib)
 library(tidyverse)
 library(plotly)
 library(reactable)
+library(webshot2)
 library(shinyWidgets)
 library(waiter)
 library(gt)
