@@ -137,7 +137,7 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
   
   con <- dbConnect(RPostgres::Postgres(),
                    host = ("DB_HOST"),
-                   port = ("DB_PORT"),
+                   port = 5432,
                    dbname = ("DB_NAME"),
                    user = ("DB_USER"),
                    password = ("DB_PASSWORD"))
