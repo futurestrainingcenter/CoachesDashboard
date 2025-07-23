@@ -135,73 +135,73 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
            `Career:` = round((Value - first(Value)) / first(Value) * 100, 1)) %>%
     ungroup()
   
-  con <- dbConnect(RPostgres::Postgres(),
-                   host = Sys.getenv("DB_HOST"),
-                   port = Sys.getenv("DB_PORT"),
-                   dbname = Sys.getenv("DB_NAME"),
-                   user = Sys.getenv("DB_USER"),
-                   password = Sys.getenv("DB_PASSWORD"))
-  
-  vuemotion_data <- dbGetQuery(con, "SELECT * FROM tbl_vuemotion_flyanalysis_10yd") %>% 
-    mutate(athlete_name = str_squish(athlete_name) %>% str_to_title())
-  
-  # AWS Credentials and S3 Configuration
-  access_key <- Sys.getenv("AWS_ACCESS_KEY_ID")
-  secret_key <- Sys.getenv("AWS_SECRET_ACCESS_KEY")
-  region <- Sys.getenv("AWS_REGION")
-  bucket <- Sys.getenv("AWS_BUCKET")
-  folder_prefix <- Sys.getenv("AWS_FOLDER_PREFIX")
-  
-  # Configure AWS S3 Client
-  s3 <- paws::s3(
-    config = list(
-      credentials = list(
-        creds = list(
-          access_key_id = access_key,
-          secret_access_key = secret_key
-        )
-      )
-    )
-  )
-  
-  # List objects in the S3 bucket
-  s3_objects <- s3$list_objects_v2(Bucket = bucket, Prefix = folder_prefix)
-  
-  # Extract the image file names
-  image_files <- sapply(s3_objects$Contents, function(x) x$Key)
-  image_files <- image_files[grepl("\\.jpg$", image_files)]  # Filter only .jpg files
-  
-  # Create a data frame with extracted details
-  image_data <- data.frame(
-    image_path = image_files,
-    file_name = basename(image_files)
-  ) %>%
-    mutate(
-      prefix = case_when(
-        str_starts(file_name, "Natural_SF_") ~ "Natural_SF",  # More specific first!
-        str_starts(file_name, "Natural_") ~ "Natural",
-        str_starts(file_name, "SF_BBGD_") ~ "SF_BBGD",
-        TRUE ~ NA_character_
-      ),
-      video_name = file_name %>%
-        str_remove("^(Natural_SF_|Natural_|SF_BBGD_)") %>%  # Remove prefixes in correct order
-        str_remove("\\.jpg$"),  # Remove .jpg extension
-      step_count = str_extract(video_name, "_[567]Steps$") %>%  # Extract the suffix (_5Steps, _6Steps, _7Steps)
-        str_remove("^_"),  # Remove leading underscore
-      video_name = str_remove(video_name, "_[567]Steps$")  # Remove suffix from video_name
-    ) %>%
-    drop_na(prefix) %>%
-    select(video_name, prefix, step_count, image_path)  # Include step_count in final output
-  
-  # Reshape to wide format so each `unique_id` has separate columns for each image type
-  image_wide <- image_data %>%
-    pivot_wider(names_from = prefix, values_from = image_path)
-  
-  # Merge with vuemotion_data
-  merged_vuemotion <- vuemotion_data %>%
-    left_join(image_wide, by = "video_name") %>%
-    filter(!is.na(step_count)) %>% 
-    distinct()
+  # con <- dbConnect(RPostgres::Postgres(),
+  #                  host = Sys.getenv("DB_HOST"),
+  #                  port = Sys.getenv("DB_PORT"),
+  #                  dbname = Sys.getenv("DB_NAME"),
+  #                  user = Sys.getenv("DB_USER"),
+  #                  password = Sys.getenv("DB_PASSWORD"))
+  # 
+  # vuemotion_data <- dbGetQuery(con, "SELECT * FROM tbl_vuemotion_flyanalysis_10yd") %>% 
+  #   mutate(athlete_name = str_squish(athlete_name) %>% str_to_title())
+  # 
+  # # AWS Credentials and S3 Configuration
+  # access_key <- Sys.getenv("AWS_ACCESS_KEY_ID")
+  # secret_key <- Sys.getenv("AWS_SECRET_ACCESS_KEY")
+  # region <- Sys.getenv("AWS_REGION")
+  # bucket <- Sys.getenv("AWS_BUCKET")
+  # folder_prefix <- Sys.getenv("AWS_FOLDER_PREFIX")
+  # 
+  # # Configure AWS S3 Client
+  # s3 <- paws::s3(
+  #   config = list(
+  #     credentials = list(
+  #       creds = list(
+  #         access_key_id = access_key,
+  #         secret_access_key = secret_key
+  #       )
+  #     )
+  #   )
+  # )
+  # 
+  # # List objects in the S3 bucket
+  # s3_objects <- s3$list_objects_v2(Bucket = bucket, Prefix = folder_prefix)
+  # 
+  # # Extract the image file names
+  # image_files <- sapply(s3_objects$Contents, function(x) x$Key)
+  # image_files <- image_files[grepl("\\.jpg$", image_files)]  # Filter only .jpg files
+  # 
+  # # Create a data frame with extracted details
+  # image_data <- data.frame(
+  #   image_path = image_files,
+  #   file_name = basename(image_files)
+  # ) %>%
+  #   mutate(
+  #     prefix = case_when(
+  #       str_starts(file_name, "Natural_SF_") ~ "Natural_SF",  # More specific first!
+  #       str_starts(file_name, "Natural_") ~ "Natural",
+  #       str_starts(file_name, "SF_BBGD_") ~ "SF_BBGD",
+  #       TRUE ~ NA_character_
+  #     ),
+  #     video_name = file_name %>%
+  #       str_remove("^(Natural_SF_|Natural_|SF_BBGD_)") %>%  # Remove prefixes in correct order
+  #       str_remove("\\.jpg$"),  # Remove .jpg extension
+  #     step_count = str_extract(video_name, "_[567]Steps$") %>%  # Extract the suffix (_5Steps, _6Steps, _7Steps)
+  #       str_remove("^_"),  # Remove leading underscore
+  #     video_name = str_remove(video_name, "_[567]Steps$")  # Remove suffix from video_name
+  #   ) %>%
+  #   drop_na(prefix) %>%
+  #   select(video_name, prefix, step_count, image_path)  # Include step_count in final output
+  # 
+  # # Reshape to wide format so each `unique_id` has separate columns for each image type
+  # image_wide <- image_data %>%
+  #   pivot_wider(names_from = prefix, values_from = image_path)
+  # 
+  # # Merge with vuemotion_data
+  # merged_vuemotion <- vuemotion_data %>%
+  #   left_join(image_wide, by = "video_name") %>%
+  #   filter(!is.na(step_count)) %>% 
+  #   distinct()
   
   # Define a temp directory for this athlete
   athlete_dir <- file.path(tempdir(), athlete)
@@ -1163,177 +1163,177 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
   gc()
   
   
-  # --- Acceleration Kinogram Processing ---
-  vuemotion_Acc_data <- merged_vuemotion %>%
-    filter(
-      run_type     == "Acc",
-      athlete_name == athlete,
-      !is.na(Natural),
-      !is.na(Natural_SF),
-      !is.na(SF_BBGD)
-    )
-  
-  if (nrow(vuemotion_Acc_data) > 0) {
-    filtered_acc_data <- vuemotion_Acc_data %>%
-      filter(`Video ID` == max(`Video ID`, na.rm = TRUE))
-    
-    # Download & composite Natural image
-    local_file <- tempfile(fileext = ".jpg")
-    s3$download_file(Bucket = bucket, Key = filtered_acc_data$Natural, Filename = local_file)
-    raw_acc_img <- image_read(local_file)
-    
-    acc_crop <- raw_acc_img %>%
-      image_crop(
-        geometry = if (filtered_acc_data$step_count == "5Steps")
-          "4100x475+250+75" else "4200x475+200+75"
-      ) %>%
-      image_resize(if (filtered_acc_data$step_count == "5Steps") "42%" else "35%")
-    
-    report_img <- image_composite(report_img, acc_crop, offset = "+965+650")
-    rm(raw_acc_img, acc_crop); gc()
-    
-    # Download & composite SF_BBGD image (two crops)
-    local_file <- tempfile(fileext = ".jpg")
-    s3$download_file(Bucket = bucket, Key = filtered_acc_data$SF_BBGD, Filename = local_file)
-    raw_sfbgd <- image_read(local_file)
-    
-    if (filtered_acc_data$step_count == "5Steps") {
-      crop1 <- image_crop(raw_sfbgd, "650x475+2800+75")
-      report_img <- image_composite(report_img, crop1, offset = "+1050+1700")
-      rm(crop1); gc()
-      
-      crop2 <- image_crop(raw_sfbgd, "525x525+2875+525")
-      report_img <- image_composite(report_img, crop2, offset = "+1800+1675")
-      rm(crop2); gc()
-      
-    } else if (filtered_acc_data$step_count == "6Steps") {
-      crop1 <- image_crop(raw_sfbgd, "525x475+1725+75")
-      report_img <- image_composite(report_img, crop1, offset = "+1050+1700")
-      rm(crop1); gc()
-      
-      crop2 <- image_crop(raw_sfbgd, "525x500+3050+550")
-      report_img <- image_composite(report_img, crop2, offset = "+1800+1675")
-      rm(crop2); gc()
-      
-    } else {
-      crop1 <- image_crop(raw_sfbgd, "525x475+2050+75")
-      report_img <- image_composite(report_img, crop1, offset = "+1050+1700")
-      rm(crop1); gc()
-      
-      crop2 <- image_crop(raw_sfbgd, "525x500+2000+550")
-      report_img <- image_composite(report_img, crop2, offset = "+1800+1675")
-      rm(crop2); gc()
-    }
-    rm(raw_sfbgd); gc()
-    
-    # Add upload date label
-    acc_date <- ggplot() +
-      annotate("text", x = 0.5, y = 0.5,
-               label = paste("Processed on:", filtered_acc_data$upload_date),
-               size = 4, hjust = 0.5, vjust = 0.5, color = "white") +
-      theme_void()
-    
-    acc_date_path <- file.path(athlete_dir, paste0(athlete, " - acc_date.png"))
-    ggsave(acc_date_path, plot = acc_date, width = 3, height = 1, units = "in", dpi = 150)
-    
-    date_img   <- image_read(acc_date_path)
-    report_img <- image_composite(report_img, date_img, offset = "+2135+845")
-    rm(date_img); gc()
-    
-  } else {
-    vuemotion_acc_plot <- ggplot() +
-      annotate("text", x = 0.5, y = 0.5,
-               label = "No Vuemotion Kinograms Available for This Run Type",
-               size = 10, hjust = 0.5, vjust = 0.5, color = "white") +
-      theme_void()
-    
-    acc_fallback_path <- file.path(athlete_dir, paste0(athlete, " - vuemotion_acc_plot.png"))
-    ggsave(acc_fallback_path, plot = vuemotion_acc_plot, width = 5, height = 1, units = "in", dpi = 200)
-    
-    fallback_img <- image_read(acc_fallback_path)
-    report_img   <- image_composite(report_img, fallback_img, offset = "+1200+625")
-    rm(fallback_img); gc()
-  }
-  
-  # --- Fly Kinogram Processing ---
-  vuemotion_fly_data <- merged_vuemotion %>%
-    filter(
-      run_type     == "Fly",
-      athlete_name == athlete,
-      !is.na(Natural),
-      !is.na(Natural_SF),
-      !is.na(SF_BBGD)
-    )
-  
-  if (nrow(vuemotion_fly_data) > 0) {
-    latest_fly <- vuemotion_fly_data %>%
-      filter(`Video ID` == max(`Video ID`, na.rm = TRUE))
-    
-    # Natural Fly image
-    local_file <- tempfile(fileext = ".jpg")
-    s3$download_file(Bucket = bucket, Key = latest_fly$Natural, Filename = local_file)
-    raw_fly <- image_read(local_file)
-    
-    fly_crop  <- raw_fly %>%
-      image_crop("4150x475+150+75") %>%
-      image_resize("35%")
-    report_img <- image_composite(report_img, fly_crop, offset = "+970+1100")
-    rm(raw_fly, fly_crop); gc()
-    
-    # SF_BBGD Fly image (three crops)
-    local_file <- tempfile(fileext = ".jpg")
-    s3$download_file(Bucket = bucket, Key = latest_fly$SF_BBGD, Filename = local_file)
-    raw_fly_sfbgd <- image_read(local_file)
-    
-    # posture
-    posture <- raw_fly_sfbgd %>%
-      image_crop("525x475+200+575") %>%
-      image_trim()
-    report_img <- image_composite(report_img, posture, offset = "+1025+2600")
-    rm(posture); gc()
-    
-    # leg recovery
-    recovery <- raw_fly_sfbgd %>%
-      image_crop("525x475+2325+575") %>%
-      image_trim()
-    report_img <- image_composite(report_img, recovery, offset = "+1600+2600")
-    rm(recovery); gc()
-    
-    # foot placement
-    placement <- raw_fly_sfbgd %>%
-      image_crop("525x475+1590+575") %>%
-      image_trim()
-    report_img <- image_composite(report_img, placement, offset = "+2125+2600")
-    rm(placement, raw_fly_sfbgd); gc()
-    
-    # Add upload date label
-    fly_date <- ggplot() +
-      annotate("text", x = 0.5, y = 0.5,
-               label = paste("Processed on:", latest_fly$upload_date),
-               size = 4, hjust = 0.5, vjust = 0.5, color = "white") +
-      theme_void()
-    
-    fly_date_path <- file.path(athlete_dir, paste0(athlete, " - fly_date.png"))
-    ggsave(fly_date_path, plot = fly_date, width = 3, height = 1, units = "in", dpi = 150)
-    
-    fly_date_img <- image_read(fly_date_path)
-    report_img    <- image_composite(report_img, fly_date_img, offset = "+2135+1285")
-    rm(fly_date_img); gc()
-    
-  } else {
-    vuemotion_fly_plot <- ggplot() +
-      annotate("text", x = 0.5, y = 0.5,
-               label = "No Vuemotion Kinograms Available for This Run Type",
-               size = 10, hjust = 0.5, vjust = 0.5, color = "white") +
-      theme_void()
-    
-    fly_fallback_path <- file.path(athlete_dir, paste0(athlete, " - rotation_plot.png"))
-    ggsave(fly_fallback_path, plot = vuemotion_fly_plot, width = 5, height = 1, units = "in", dpi = 200)
-    
-    fallback_img <- image_read(fly_fallback_path)
-    report_img   <- image_composite(report_img, fallback_img, offset = "+1200+1085")
-    rm(fallback_img); gc()
-  }
+  # # --- Acceleration Kinogram Processing ---
+  # vuemotion_Acc_data <- merged_vuemotion %>%
+  #   filter(
+  #     run_type     == "Acc",
+  #     athlete_name == athlete,
+  #     !is.na(Natural),
+  #     !is.na(Natural_SF),
+  #     !is.na(SF_BBGD)
+  #   )
+  # 
+  # if (nrow(vuemotion_Acc_data) > 0) {
+  #   filtered_acc_data <- vuemotion_Acc_data %>%
+  #     filter(`Video ID` == max(`Video ID`, na.rm = TRUE))
+  #   
+  #   # Download & composite Natural image
+  #   local_file <- tempfile(fileext = ".jpg")
+  #   s3$download_file(Bucket = bucket, Key = filtered_acc_data$Natural, Filename = local_file)
+  #   raw_acc_img <- image_read(local_file)
+  #   
+  #   acc_crop <- raw_acc_img %>%
+  #     image_crop(
+  #       geometry = if (filtered_acc_data$step_count == "5Steps")
+  #         "4100x475+250+75" else "4200x475+200+75"
+  #     ) %>%
+  #     image_resize(if (filtered_acc_data$step_count == "5Steps") "42%" else "35%")
+  #   
+  #   report_img <- image_composite(report_img, acc_crop, offset = "+965+650")
+  #   rm(raw_acc_img, acc_crop); gc()
+  #   
+  #   # Download & composite SF_BBGD image (two crops)
+  #   local_file <- tempfile(fileext = ".jpg")
+  #   s3$download_file(Bucket = bucket, Key = filtered_acc_data$SF_BBGD, Filename = local_file)
+  #   raw_sfbgd <- image_read(local_file)
+  #   
+  #   if (filtered_acc_data$step_count == "5Steps") {
+  #     crop1 <- image_crop(raw_sfbgd, "650x475+2800+75")
+  #     report_img <- image_composite(report_img, crop1, offset = "+1050+1700")
+  #     rm(crop1); gc()
+  #     
+  #     crop2 <- image_crop(raw_sfbgd, "525x525+2875+525")
+  #     report_img <- image_composite(report_img, crop2, offset = "+1800+1675")
+  #     rm(crop2); gc()
+  #     
+  #   } else if (filtered_acc_data$step_count == "6Steps") {
+  #     crop1 <- image_crop(raw_sfbgd, "525x475+1725+75")
+  #     report_img <- image_composite(report_img, crop1, offset = "+1050+1700")
+  #     rm(crop1); gc()
+  #     
+  #     crop2 <- image_crop(raw_sfbgd, "525x500+3050+550")
+  #     report_img <- image_composite(report_img, crop2, offset = "+1800+1675")
+  #     rm(crop2); gc()
+  #     
+  #   } else {
+  #     crop1 <- image_crop(raw_sfbgd, "525x475+2050+75")
+  #     report_img <- image_composite(report_img, crop1, offset = "+1050+1700")
+  #     rm(crop1); gc()
+  #     
+  #     crop2 <- image_crop(raw_sfbgd, "525x500+2000+550")
+  #     report_img <- image_composite(report_img, crop2, offset = "+1800+1675")
+  #     rm(crop2); gc()
+  #   }
+  #   rm(raw_sfbgd); gc()
+  #   
+  #   # Add upload date label
+  #   acc_date <- ggplot() +
+  #     annotate("text", x = 0.5, y = 0.5,
+  #              label = paste("Processed on:", filtered_acc_data$upload_date),
+  #              size = 4, hjust = 0.5, vjust = 0.5, color = "white") +
+  #     theme_void()
+  #   
+  #   acc_date_path <- file.path(athlete_dir, paste0(athlete, " - acc_date.png"))
+  #   ggsave(acc_date_path, plot = acc_date, width = 3, height = 1, units = "in", dpi = 150)
+  #   
+  #   date_img   <- image_read(acc_date_path)
+  #   report_img <- image_composite(report_img, date_img, offset = "+2135+845")
+  #   rm(date_img); gc()
+  #   
+  # } else {
+  #   vuemotion_acc_plot <- ggplot() +
+  #     annotate("text", x = 0.5, y = 0.5,
+  #              label = "No Vuemotion Kinograms Available for This Run Type",
+  #              size = 10, hjust = 0.5, vjust = 0.5, color = "white") +
+  #     theme_void()
+  #   
+  #   acc_fallback_path <- file.path(athlete_dir, paste0(athlete, " - vuemotion_acc_plot.png"))
+  #   ggsave(acc_fallback_path, plot = vuemotion_acc_plot, width = 5, height = 1, units = "in", dpi = 200)
+  #   
+  #   fallback_img <- image_read(acc_fallback_path)
+  #   report_img   <- image_composite(report_img, fallback_img, offset = "+1200+625")
+  #   rm(fallback_img); gc()
+  # }
+  # 
+  # # --- Fly Kinogram Processing ---
+  # vuemotion_fly_data <- merged_vuemotion %>%
+  #   filter(
+  #     run_type     == "Fly",
+  #     athlete_name == athlete,
+  #     !is.na(Natural),
+  #     !is.na(Natural_SF),
+  #     !is.na(SF_BBGD)
+  #   )
+  # 
+  # if (nrow(vuemotion_fly_data) > 0) {
+  #   latest_fly <- vuemotion_fly_data %>%
+  #     filter(`Video ID` == max(`Video ID`, na.rm = TRUE))
+  #   
+  #   # Natural Fly image
+  #   local_file <- tempfile(fileext = ".jpg")
+  #   s3$download_file(Bucket = bucket, Key = latest_fly$Natural, Filename = local_file)
+  #   raw_fly <- image_read(local_file)
+  #   
+  #   fly_crop  <- raw_fly %>%
+  #     image_crop("4150x475+150+75") %>%
+  #     image_resize("35%")
+  #   report_img <- image_composite(report_img, fly_crop, offset = "+970+1100")
+  #   rm(raw_fly, fly_crop); gc()
+  #   
+  #   # SF_BBGD Fly image (three crops)
+  #   local_file <- tempfile(fileext = ".jpg")
+  #   s3$download_file(Bucket = bucket, Key = latest_fly$SF_BBGD, Filename = local_file)
+  #   raw_fly_sfbgd <- image_read(local_file)
+  #   
+  #   # posture
+  #   posture <- raw_fly_sfbgd %>%
+  #     image_crop("525x475+200+575") %>%
+  #     image_trim()
+  #   report_img <- image_composite(report_img, posture, offset = "+1025+2600")
+  #   rm(posture); gc()
+  #   
+  #   # leg recovery
+  #   recovery <- raw_fly_sfbgd %>%
+  #     image_crop("525x475+2325+575") %>%
+  #     image_trim()
+  #   report_img <- image_composite(report_img, recovery, offset = "+1600+2600")
+  #   rm(recovery); gc()
+  #   
+  #   # foot placement
+  #   placement <- raw_fly_sfbgd %>%
+  #     image_crop("525x475+1590+575") %>%
+  #     image_trim()
+  #   report_img <- image_composite(report_img, placement, offset = "+2125+2600")
+  #   rm(placement, raw_fly_sfbgd); gc()
+  #   
+  #   # Add upload date label
+  #   fly_date <- ggplot() +
+  #     annotate("text", x = 0.5, y = 0.5,
+  #              label = paste("Processed on:", latest_fly$upload_date),
+  #              size = 4, hjust = 0.5, vjust = 0.5, color = "white") +
+  #     theme_void()
+  #   
+  #   fly_date_path <- file.path(athlete_dir, paste0(athlete, " - fly_date.png"))
+  #   ggsave(fly_date_path, plot = fly_date, width = 3, height = 1, units = "in", dpi = 150)
+  #   
+  #   fly_date_img <- image_read(fly_date_path)
+  #   report_img    <- image_composite(report_img, fly_date_img, offset = "+2135+1285")
+  #   rm(fly_date_img); gc()
+  #   
+  # } else {
+  #   vuemotion_fly_plot <- ggplot() +
+  #     annotate("text", x = 0.5, y = 0.5,
+  #              label = "No Vuemotion Kinograms Available for This Run Type",
+  #              size = 10, hjust = 0.5, vjust = 0.5, color = "white") +
+  #     theme_void()
+  #   
+  #   fly_fallback_path <- file.path(athlete_dir, paste0(athlete, " - rotation_plot.png"))
+  #   ggsave(fly_fallback_path, plot = vuemotion_fly_plot, width = 5, height = 1, units = "in", dpi = 200)
+  #   
+  #   fallback_img <- image_read(fly_fallback_path)
+  #   report_img   <- image_composite(report_img, fallback_img, offset = "+1200+1085")
+  #   rm(fallback_img); gc()
+  # }
   
   # Final write-out
   final_report_path <- file.path(athlete_dir, "FuturesSpeedReport.png")
