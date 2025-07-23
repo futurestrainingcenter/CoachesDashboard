@@ -136,21 +136,21 @@ generate_speed_report <- function(client_data, speed_data, athlete, month, year)
     ungroup()
   
   con <- dbConnect(RPostgres::Postgres(),
-                   host = ("DB_HOST"),
-                   port = 5432,
-                   dbname = ("DB_NAME"),
-                   user = ("DB_USER"),
-                   password = ("DB_PASSWORD"))
+                   host = Sys.getenv("DB_HOST"),
+                   port = Sys.getenv("DB_PORT"),
+                   dbname = Sys.getenv("DB_NAME"),
+                   user = Sys.getenv("DB_USER"),
+                   password = Sys.getenv("DB_PASSWORD"))
   
   vuemotion_data <- dbGetQuery(con, "SELECT * FROM tbl_vuemotion_flyanalysis_10yd") %>% 
     mutate(athlete_name = str_squish(athlete_name) %>% str_to_title())
   
   # AWS Credentials and S3 Configuration
-  access_key <- ("AWS_ACCESS_KEY_ID")
-  secret_key <- ("AWS_SECRET_ACCESS_KEY")
-  region <- ("AWS_REGION")
-  bucket <- ("AWS_BUCKET")
-  folder_prefix <- ("AWS_FOLDER_PREFIX")
+  access_key <- Sys.getenv("AWS_ACCESS_KEY_ID")
+  secret_key <- Sys.getenv("AWS_SECRET_ACCESS_KEY")
+  region <- Sys.getenv("AWS_REGION")
+  bucket <- Sys.getenv("AWS_BUCKET")
+  folder_prefix <- Sys.getenv("AWS_FOLDER_PREFIX")
   
   # Configure AWS S3 Client
   s3 <- paws::s3(
