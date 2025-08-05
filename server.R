@@ -398,12 +398,12 @@ server <- function(input, output, session) {
       filter(!is.na(Value)) %>%
       group_by(`Service Name`, Name, metric_col) %>%
       arrange(Date) %>%
-      filter(n() >= 6) %>%
+      filter(n() >= 2) %>%
       summarise(
-        First      = mean(head(Value, 3), na.rm = TRUE),
-        Last       = mean(tail(Value, 3), na.rm = TRUE),
-        OverallAvg = mean(Value,          na.rm = TRUE),
-        .groups     = "drop"
+        First      = first(Value, na_rm = TRUE),
+        Last       = last(Value,  na_rm = TRUE),
+        OverallAvg = mean(Value,  na.rm = TRUE),
+        .groups    = "drop"
       ) %>%
       mutate(
         Improvement = Last - First,
@@ -515,11 +515,11 @@ server <- function(input, output, session) {
       filter(!is.na(Value)) %>%
       group_by(`Service Name`, Name, metric_col) %>%
       arrange(Date) %>%
-      filter(n() >= 6) %>%
+      filter(n() >= 2) %>%
       summarise(
-        First      = mean(head(Value, 3), na.rm = TRUE),
-        Last       = mean(tail(Value, 3), na.rm = TRUE),
-        OverallAvg = mean(Value,          na.rm = TRUE),
+        First      = first(Value, na_rm = TRUE),
+        Last       = last(Value,  na_rm = TRUE),
+        OverallAvg = mean(Value,  na.rm = TRUE),
         .groups    = "drop"
       ) %>%
       mutate(
@@ -532,7 +532,8 @@ server <- function(input, output, session) {
           metric_col == "irtarm_strength" ~ "IR",
           metric_col == "ertarm_strength" ~ "ER",
           metric_col == "starm_strength"  ~ "Scaption",
-          metric_col == "gtarm_strength"  ~ "Grip"
+          metric_col == "gtarm_strength"  ~ "Grip",
+          metric_col == "total_strength"  ~ "Total Strength",
         )
       )
     
