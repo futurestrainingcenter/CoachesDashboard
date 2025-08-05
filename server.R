@@ -3629,6 +3629,9 @@ server <- function(input, output, session) {
   output$report_buttons <- renderUI({
     req(input$report_athlete_name, input$report_month, input$report_year)
     
+    filtered_pitching <- pitching_data %>% 
+      filter(!is.na(TaggedPitchType))
+    
     name <- input$report_athlete_name
     month <- input$report_month
     year <- input$report_year
@@ -3642,7 +3645,7 @@ server <- function(input, output, session) {
     if (has_data(hitting_data)) {
       buttons <- tagAppendChild(buttons, downloadButton("download_hitting_report", "Hitting"))
     }
-    if (has_data(pitching_data)) {
+    if (has_data(filtered_pitching)) {
       buttons <- tagAppendChild(buttons, downloadButton("download_pitching_report", "Pitching"))
     }
     if (has_data(strength_data)) {
