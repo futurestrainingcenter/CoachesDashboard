@@ -508,7 +508,7 @@ server <- function(input, output, session) {
         Attendance %in% input$facility_attendance
       ) %>%
       pivot_longer(
-        cols = c(irtarm_strength, ertarm_strength, starm_strength, gtarm_strength),
+        cols = c(total_strength, irtarm_strength, ertarm_strength, starm_strength, gtarm_strength),
         names_to  = "metric_col",
         values_to = "Value"
       ) %>%
