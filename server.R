@@ -1012,8 +1012,8 @@ server <- function(input, output, session) {
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
       summarise(
-        `Overall Average`       = round(mean(OverallAvg,       na.rm = TRUE), 2),
-        `Average Improvement`   = round(mean(Improvement,      na.rm = TRUE), 2),
+        `Overall Average`       = round(mean(OverallAvg,       na.rm = TRUE), 3),
+        `Average Improvement`   = round(mean(Improvement,      na.rm = TRUE), 3),
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
@@ -1023,8 +1023,8 @@ server <- function(input, output, session) {
       group_by(Exercise) %>%
       summarise(
         `Service Name` = "Summary",
-        `Overall Average`       = round(mean(OverallAvg,       na.rm = TRUE), 2),
-        `Average Improvement`   = round(mean(Improvement,      na.rm = TRUE), 2),
+        `Overall Average`       = round(mean(OverallAvg,       na.rm = TRUE), 3),
+        `Average Improvement`   = round(mean(Improvement,      na.rm = TRUE), 3),
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
