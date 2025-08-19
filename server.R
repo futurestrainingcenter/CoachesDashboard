@@ -31,6 +31,13 @@ server <- function(input, output, session) {
   
   # ── Facility dropdowns ───────────────────────────────────────────
   
+  # Add reactive values to store filter states at the beginning of your server function
+  filter_values <- reactiveValues(
+    date_range = NULL,
+    level = NULL
+  )
+  
+  # Modified date range UI
   output$facility_date_range_ui <- renderUI({
     data <- switch(input$facility_metric,
                    "HitTrax"   = hitting_data,
@@ -43,10 +50,32 @@ server <- function(input, output, session) {
                    "VALD"      = speed_data
     )
     req(data)
+    
+    # Use stored values if they exist, otherwise use defaults
+    start_date <- if(!is.null(filter_values$date_range)) {
+      filter_values$date_range[1]
+    } else {
+      Sys.Date() %m-% months(6)
+    }
+    
+    end_date <- if(!is.null(filter_values$date_range)) {
+      filter_values$date_range[2]
+    } else {
+      Sys.Date()
+    }
+    
     dateRangeInput("facility_date_range", "Select Date Range:",
-                   start = Sys.Date() %m-% months(6), end = Sys.Date(), width = '280px')
+                   start = start_date, 
+                   end = end_date, 
+                   width = '280px')
   })
   
+  # Observer to update stored date range
+  observeEvent(input$facility_date_range, {
+    filter_values$date_range <- input$facility_date_range
+  })
+  
+  # Modified level UI
   output$facility_level_ui <- renderUI({
     data <- switch(input$facility_metric,
                    "HitTrax"   = hitting_data,
@@ -59,11 +88,32 @@ server <- function(input, output, session) {
                    "VALD"      = speed_data
     )
     req(data)
+    
+    available_levels <- sort(unique(data$Level))
+    
+    # Use stored values if they exist and are still valid
+    selected_levels <- if(!is.null(filter_values$level)) {
+      # Keep only the levels that exist in the current dataset
+      intersect(filter_values$level, available_levels)
+    } else {
+      c("L1", "L2", "L3")
+    }
+    
+    # If no valid selections remain, use defaults
+    if(length(selected_levels) == 0) {
+      selected_levels <- intersect(c("L1", "L2", "L3"), available_levels)
+    }
+    
     pickerInput("facility_level", "Select Level:",
-                choices = sort(unique(data$Level)),
-                selected = c("L1", "L2", "L3"),
+                choices = available_levels,
+                selected = selected_levels,
                 multiple = TRUE,
-                width =  '225px')
+                width = '225px')
+  })
+  
+  # Observer to update stored level
+  observeEvent(input$facility_level, {
+    filter_values$level <- input$facility_level
   })
   
   output$facility_service_ui <- renderUI({
