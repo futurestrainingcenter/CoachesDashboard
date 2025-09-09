@@ -384,9 +384,9 @@ generate_strength_report <- function(client_data, strength_data, athlete, month,
          units  = "in",
          dpi    = 150)
   
-  # 2. Read & composite into your existing report_img in‑place
-  profile_img <- image_read(summary_path)
-  report_img  <- image_composite(report_img, profile_img, offset = "+700+50")
+  # 2. Read & composite into report_img (no new HittingReport2 variable)
+  playerProfileImg <- image_read(profile_path)
+  report_img       <- image_composite(report_img, playerProfileImg, offset = "+700+50")
   
   # 3. Free the temporary image from memory
   rm(profile_img)
