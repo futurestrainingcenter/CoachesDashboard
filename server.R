@@ -8,11 +8,16 @@ library(plotly)
 library(gt)
 library(reactable)
 
-# Source report functions
+# Source Monthly Report functions
 source("HittingReport.R", local = TRUE)
 source("PitchingReport.R", local = TRUE)
 source("StrengthReport.R", local = TRUE)
 source("SpeedReport.R", local = TRUE)
+
+# Source Prospect Report functions
+source("HittingProspectReport.R", local = TRUE)
+source("PitchingProspectReport.R", local = TRUE)
+
 
 server <- function(input, output, session) {
   
@@ -28,6 +33,15 @@ server <- function(input, output, session) {
   strength_data  <- readRDS("StrengthFacilityData.rds")
   speed_data     <- readRDS("SpeedFacilityData.rds")
   client_data    <- readRDS("ClientData.rds")
+
+  # ── Load Stuff+ model once at startup ──────────────────────────────
+
+  fastball_model  <- readRDS("fastball_model.rds")
+  fastball_params <- readRDS("fastball_scaling_params.rds")
+  breaking_model  <- readRDS("breaking_model.rds")
+  breaking_params <- readRDS("breaking_scaling_params.rds")
+  offspeed_model  <- readRDS("offspeed_model.rds")
+  offspeed_params <- readRDS("offspeed_scaling_params.rds")
   
   # ── Facility dropdowns ───────────────────────────────────────────
   
@@ -3653,7 +3667,7 @@ server <- function(input, output, session) {
       )
   })
   
-  # Report Downloader -------------------------------------------------------
+  # Monthly Report Downloader ----------------------------------------------
   
   # UI: Populate athlete selector from client_data
   output$athlete_selector <- renderUI({
@@ -3799,6 +3813,115 @@ server <- function(input, output, session) {
       file.copy(report_path, file)
     }
   )
+
+  # Prospect Report Downloader ----------------------------------------------
+
+  # UI: Populate the athlete selector for Prospect Reports
+  output$prospect_athlete_selector <- renderUI({
+    athlete_choices <- client_data %>%
+      distinct(Name) %>%
+      arrange(Name) %>%
+      pull(Name)
+    
+    pickerInput(
+      inputId  = "prospect_athlete_name",
+      label    = "Athlete:",
+      choices  = athlete_choices,
+      options  = list(
+        `live-search`        = TRUE,
+        `actions-box`        = FALSE,
+        `size`               = 5,
+        `none-selected-text` = 'Type to search…'
+      ),
+      width = "100%"
+    )
+  })
+
+  # UI: Conditionally show download buttons for Prospect Reports
+  output$prospect_report_buttons <- renderUI({
+    req(input$prospect_athlete_name)
+    
+    athlete_name <- input$prospect_athlete_name
+    
+    # Check for data presence for each report type
+    has_hitting_data <- any(hitting_data$Name == athlete_name, na.rm = TRUE)
+    has_pitching_data <- any(pitching_data$Name == athlete_name, na.rm = TRUE)
+    
+    buttons <- tagList()
+    
+    if (has_hitting_data) {
+      buttons <- tagAppendChild(
+        buttons, 
+        downloadButton(
+          "download_hitting_prospect_report",
+          "Hitting Prospect Report"
+        )
+      )
+    }
+    
+    # # NEW: Add a download button if the athlete has pitching data
+    # if (has_pitching_data) {
+    #   buttons <- tagAppendChild(
+    #     buttons, 
+    #     downloadButton(
+    #       "download_pitching_prospect_report", 
+    #       "Pitching Prospect Report"
+    #     )
+    #   )
+    # }
+    
+    div(style = "display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;", buttons)
+  })
+
+  # Server: Hitting Prospect Report Download Handler
+  output$download_hitting_prospect_report <- downloadHandler(
+    filename = function() {
+      paste0(input$prospect_athlete_name, " Hitting Prospect Report.png")
+    },
+    content = function(file) {
+      report_waiter$show()
+      on.exit(report_waiter$hide(), add = TRUE)
+      
+      report_path <- generate_hitting_report(
+        client_data   = client_data,
+        hitting_data  = hitting_data,
+        pitching_data = pitching_data,
+        strength_data = strength_data,
+        speed_data    = speed_data,
+        athlete       = input$prospect_athlete_name
+      )
+      
+      file.copy(report_path, file)
+    }
+  )
+
+  # # NEW: Server: Pitching Prospect Report Download Handler
+  # output$download_pitching_prospect_report <- downloadHandler(
+  #   filename = function() {
+  #     paste0(input$prospect_athlete_name, " Pitching Prospect Report.png")
+  #   },
+  #   content = function(file) {
+  #     report_waiter$show()
+  #     on.exit(report_waiter$hide(), add = TRUE)
+      
+  #     # Call the pitching report function with its specific parameters
+  #     report_path <- generate_pitching_report(
+  #       client_data     = client_data,
+  #       strength_data   = strength_data,
+  #       speed_data      = speed_data,
+  #       trackman_data   = trackman_data,
+  #       fastball_model  = fastball_model,
+  #       fastball_params = fastball_params,
+  #       breaking_model  = breaking_model,
+  #       breaking_params = breaking_params,
+  #       offspeed_model  = offspeed_model,
+  #       offspeed_params = offspeed_params,
+  #       athlete         = input$prospect_athlete_name
+  #     )
+      
+  #     file.copy(report_path, file)
+  #   }
+  # )
 }
 
 shinyServer(server)

@@ -573,8 +573,7 @@ maxEV_plot <- ggplot(athlete_summary, aes(x = Date, y = MaxVel)) +
 maxEV_gt_path <- file.path(athlete_dir, paste0(athlete, "_maxEV_gt.png"))
 gtsave(maxEV_gt, file = maxEV_gt_path, expand = -1)
 
-gt_img       <- image_read(maxEV_gt_path) %>%
-  image_transparent(color = "black")
+gt_img       <- image_read(maxEV_gt_path) %>% image_transparent(color = "black")
 report_img   <- image_composite(report_img, gt_img, offset = "+1225+2400")
 
 rm(gt_img)  

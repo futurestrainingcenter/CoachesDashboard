@@ -582,7 +582,7 @@ ui <- tagList(
                 )
       ),
       
-      nav_panel("Reports",
+      nav_panel("Monthly Reports",
                 div(
                   id   = "report_card",
                   class = "mx-auto px-4",
@@ -621,6 +621,31 @@ ui <- tagList(
                     )
                   )
                 )
+      ),
+
+      nav_panel("Prospect Reports",
+          div(
+            id   = "prospect_report_card",
+            class = "mx-auto px-4",
+            style = "display: flex; justify-content: center;",
+            card(
+              class = "p-4 shadow-sm",
+              style = "width: 400px; height: 350px;", # Adjusted height for fewer inputs
+              card_header(
+                h3("Generate Prospect Report", class = "text-center mb-4")
+              ),
+              div(
+                class = "d-flex flex-column align-items-stretch gap-3",
+                # A new UI output for the prospect report athlete selector
+                uiOutput("prospect_athlete_selector"), 
+                
+                div(style = "margin-top: 25px;"),
+                
+                # A new UI output for the prospect report download button
+                uiOutput("prospect_report_buttons") 
+              )
+            )
+          )
       )
     ),
     
