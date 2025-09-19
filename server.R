@@ -16,7 +16,7 @@ source("SpeedReport.R", local = TRUE)
 
 # Source Prospect Report functions
 source("HittingProspectReport.R", local = TRUE)
-source("PitchingProspectReport.R", local = TRUE)
+# source("PitchingProspectReport.R", local = TRUE)
 
 
 server <- function(input, output, session) {
