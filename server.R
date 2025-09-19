@@ -36,12 +36,12 @@ server <- function(input, output, session) {
 
   # ── Load Stuff+ model once at startup ──────────────────────────────
 
-  fastball_model  <- readRDS("fastball_model.rds")
-  fastball_params <- readRDS("fastball_scaling_params.rds")
-  breaking_model  <- readRDS("breaking_model.rds")
-  breaking_params <- readRDS("breaking_scaling_params.rds")
-  offspeed_model  <- readRDS("offspeed_model.rds")
-  offspeed_params <- readRDS("offspeed_scaling_params.rds")
+  # fastball_model  <- readRDS("fastball_model.rds")
+  # fastball_params <- readRDS("fastball_scaling_params.rds")
+  # breaking_model  <- readRDS("breaking_model.rds")
+  # breaking_params <- readRDS("breaking_scaling_params.rds")
+  # offspeed_model  <- readRDS("offspeed_model.rds")
+  # offspeed_params <- readRDS("offspeed_scaling_params.rds")
   
   # ── Facility dropdowns ───────────────────────────────────────────
   
