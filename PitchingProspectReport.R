@@ -1,7 +1,6 @@
 library(tidyverse)
 library(tidymodels)
 library(extrasteps)
-library(ggchicklet)
 library(readxl)
 library(fmsb)
 library(magick)

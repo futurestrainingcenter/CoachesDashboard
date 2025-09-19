@@ -1,5 +1,4 @@
 library(tidyverse)
-library(ggchicklet)
 library(readxl)
 library(fmsb)
 library(magick)
