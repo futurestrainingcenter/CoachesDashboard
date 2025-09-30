@@ -52,7 +52,7 @@ ui <- tagList(
                                   choices = list(
                                     "Hitting"   = c("HitTrax", "Blast"),
                                     "Pitching"  = c("Trackman", "Armcare"),
-                                    "Strength"  = c("ForceDecks", "Dynamo", "Proteus"),
+                                    "Strength"  = c("ForceDecks", "Proteus"),
                                     "Speed"     = c("VALD")
                                   ),
                                   multiple = FALSE,
@@ -375,7 +375,6 @@ ui <- tagList(
                            layout_columns(
                              div(style = "text-align: center;",
                                  actionButton("show_forceplate_table",  "ForcePlate"),
-                                 actionButton("show_dynamo_table",      "Dynamo"),
                                  actionButton("show_proteus_table",     "Proteus")
                              )
                            ),

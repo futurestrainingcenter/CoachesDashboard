@@ -59,7 +59,6 @@ server <- function(input, output, session) {
                    "Trackman"  = pitching_data,
                    "Armcare"   = pitching_data,
                    "ForceDecks"= strength_data,
-                   "Dynamo"    = strength_data,
                    "Proteus"   = strength_data,
                    "VALD"      = speed_data
     )
@@ -97,7 +96,6 @@ server <- function(input, output, session) {
                    "Trackman"  = pitching_data,
                    "Armcare"   = pitching_data,
                    "ForceDecks"= strength_data,
-                   "Dynamo"    = strength_data,
                    "Proteus"   = strength_data,
                    "VALD"      = speed_data
     )
@@ -137,7 +135,6 @@ server <- function(input, output, session) {
                    "Trackman"   = pitching_data,
                    "Armcare"    = pitching_data,
                    "ForceDecks" = strength_data,
-                   "Dynamo"     = strength_data,
                    "Proteus"    = strength_data,
                    "VALD"       = speed_data
     )
@@ -149,7 +146,6 @@ server <- function(input, output, session) {
                                "Trackman" = c("Baseball Pitching L1", "Baseball Pitching L2", "Baseball Pitching L3", "Learning Academy"),
                                "Armcare"  = c("Baseball Pitching L1", "Baseball Pitching L2", "Baseball Pitching L3", "Learning Academy"),
                                "ForceDecks" = c("Strength L2", "Strength L3", "Power L3", "Learning Academy"),
-                               "Dynamo"     = c("Strength L2", "Strength L3", "Power L3", "Learning Academy"),
                                "Proteus"    = c("Strength L2", "Strength L3", "Power L3", "Learning Academy"),
                                "VALD"    = c("Speed L1", "Speed L1/L2", "Speed L2", "Speed L2/L3", "Speed L3", "Learning Academy"),
                                character(0)
@@ -171,7 +167,6 @@ server <- function(input, output, session) {
                    "HitTrax"    = hitting_data,
                    "Blast"      = hitting_data,
                    "ForceDecks" = strength_data,
-                   "Dynamo"     = strength_data,
                    "Proteus"    = strength_data,
                    "VALD"       = speed_data
     )
@@ -191,7 +186,6 @@ server <- function(input, output, session) {
                    "Trackman"  = pitching_data,
                    "Armcare"   = pitching_data,
                    "ForceDecks"= strength_data,
-                   "Dynamo"    = strength_data,
                    "Proteus"   = strength_data,
                    "VALD"      = speed_data
     )
@@ -792,121 +786,6 @@ server <- function(input, output, session) {
       sub_missing()
   }
   
-  generate_dynamo_gt <- function() {
-    req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
-    # Step 1: Main data with improvements
-    df <- strength_data %>%
-      filter(
-        Date >= input$facility_date_range[1],
-        Date <= input$facility_date_range[2],
-        Level %in% input$facility_level,
-        `Service Name` %in% input$facility_service,
-        Gender %in% input$facility_gender,
-        Attendance %in% input$facility_attendance
-      ) %>%
-      pivot_longer(
-        cols = c(`External Rotation`, `Internal Rotation`, `Dynamo - Trunk`),
-        names_to  = "metric_col",
-        values_to = "Value"
-      ) %>%
-      filter(!is.na(Value)) %>%
-      group_by(`Service Name`, Name, metric_col) %>%
-      arrange(Date) %>%
-      filter(n() >= 2) %>%
-      summarise(
-        First      = first(Value, na_rm = TRUE),
-        Last       = last(Value,  na_rm = TRUE),
-        OverallAvg = mean(Value,  na.rm = TRUE),
-        .groups    = "drop"
-      ) %>% 
-      mutate(
-        Improvement = Last - First,
-        Percent = case_when(
-          First == 0 ~ NA_real_,
-          TRUE ~ Improvement / First * 100
-        ),
-        Exercise = case_when(
-          metric_col == "External Rotation"  ~ "External Rotation",
-          metric_col == "Internal Rotation"  ~ "Internal Rotation",
-          metric_col == "Dynamo - Trunk"     ~ "ISO Trunk Rotation"
-        )
-      )
-    
-    # Step 2: Grouped data for display table
-    df_grouped <- df %>%
-      group_by(`Service Name`, Exercise) %>%
-      summarise(
-        `Overall Average`       = round(mean(OverallAvg,       na.rm = TRUE), 1),
-        `Average Improvement`   = round(mean(Improvement,      na.rm = TRUE), 1),
-        `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
-        .groups = "drop"
-      )
-    
-    # Step 3: True summary row based on all data
-    summary_row <- df %>%
-      group_by(Exercise) %>%
-      summarise(
-        `Service Name` = "Summary",
-        `Overall Average`       = round(mean(OverallAvg,       na.rm = TRUE), 1),
-        `Average Improvement`   = round(mean(Improvement,      na.rm = TRUE), 1),
-        `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
-        .groups = "drop"
-      )
-    
-    # Step 4: Combine into final table
-    df_final <- bind_rows(summary_row, df_grouped)
-    
-    # Step 5: Generate gt table
-    df_final %>%
-      gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
-      text_transform(
-        locations = cells_body(columns = c(`Average % Improvement`)),
-        fn = function(x) {
-          paste0(x, "%")
-        }
-      ) %>%
-      tab_style(
-        style = list(cell_text(color = "#008000")),
-        locations = cells_body(
-          columns = c(`Average Improvement`, `Average % Improvement`),
-          rows = (`Average Improvement` > 0)
-        )
-      ) %>%
-      tab_style(
-        style = list(cell_text(color = "#FF0000")),
-        locations = cells_body(
-          columns = c(`Average Improvement`, `Average % Improvement`),
-          rows = (`Average Improvement` < 0)
-        )
-      ) %>%
-      tab_style(
-        style = cell_text(weight = "bold"),
-        locations = cells_body(rows = `Service Name` == "Summary")
-      ) %>%
-      tab_style(
-        style = cell_fill(color = "gray95"),
-        locations = cells_body(rows = `Service Name` == "Summary")
-      ) %>%
-      tab_options(
-        table.width = px(1260),
-        row_group.as_column = TRUE,
-        table.border.top.style = "hidden",
-        column_labels.border.top.style = "hidden"
-      ) %>%
-      tab_stub_indent(
-        rows = everything(),
-        indent = 2
-      ) %>%
-      cols_width(
-        Exercise ~ px(300),
-        `Service Name` ~ px(300),
-        `Overall Average` ~ px(220),
-        `Average Improvement` ~ px(220),
-        `Average % Improvement` ~ px(220)
-      ) %>%
-      sub_missing()
-  }
   
   generate_proteus_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
@@ -922,7 +801,7 @@ server <- function(input, output, session) {
         Attendance %in% input$facility_attendance
       ) %>%
       pivot_longer(
-        cols = c(TrunkRotation, ShotPut, D2Ext, D2Flex),
+        cols = c(TrunkRotation, D2Ext, D2Flex),
         names_to  = "metric_col",
         values_to = "Value"
       ) %>%
@@ -944,7 +823,6 @@ server <- function(input, output, session) {
         ),
         Exercise = case_when(
           metric_col == "TrunkRotation" ~ "Trunk Rotation",
-          metric_col == "ShotPut"       ~ "Shot Put",
           metric_col == "D2Flex"        ~ "D2 Flexion",
           metric_col == "D2Ext"         ~ "D2 Extension"
         )
@@ -1156,7 +1034,6 @@ server <- function(input, output, session) {
            "Trackman"  = generate_trackman_gt(),
            "Armcare"   = generate_armcare_gt(),
            "ForceDecks"= generate_forceplate_gt(),
-           "Dynamo"    = generate_dynamo_gt(),
            "Proteus"   = generate_proteus_gt(),
            "VALD"      = generate_smartspeed_gt()
     )
@@ -2587,8 +2464,6 @@ server <- function(input, output, session) {
         IBSQT    = if (all(is.na(IBSQT)))    NA_real_ else max(IBSQT,    na.rm = TRUE),
         CMJ      = if (all(is.na(CMJ)))      NA_real_ else max(CMJ,       na.rm = TRUE),
         SHLDISOY = if (all(is.na(SHLDISOY))) NA_real_ else max(SHLDISOY,  na.rm = TRUE),
-        ShotPut  = if (all(is.na(ShotPut))) NA_real_ else max(ShotPut, na.rm = TRUE),
-        ISOTrunk = if (all(is.na(`Dynamo - Trunk`)))    NA_real_ else max(`Dynamo - Trunk`, na.rm = TRUE),
         Trunk    = if (all(is.na(TrunkRotation))) NA_real_ else max(TrunkRotation, na.rm = TRUE),
         .groups  = "drop"
       )
@@ -2606,8 +2481,6 @@ server <- function(input, output, session) {
         IBSQT    = if (all(is.na(IBSQT)))    NA_real_ else max(IBSQT,    na.rm = TRUE),
         CMJ      = if (all(is.na(CMJ)))      NA_real_ else max(CMJ,       na.rm = TRUE),
         SHLDISOY = if (all(is.na(SHLDISOY))) NA_real_ else max(SHLDISOY,  na.rm = TRUE),
-        ShotPut  = if (all(is.na(ShotPut))) NA_real_ else max(ShotPut, na.rm = TRUE),
-        ISOTrunk = if (all(is.na(`Dynamo - Trunk`)))    NA_real_ else max(`Dynamo - Trunk`,      na.rm = TRUE),
         Trunk    = if (all(is.na(TrunkRotation))) NA_real_ else max(TrunkRotation, na.rm = TRUE),
         .groups  = "drop"
       )
@@ -2623,7 +2496,6 @@ server <- function(input, output, session) {
         IBSQT_Percentile    = round(percent_rank(IBSQT)    * 100),
         CMJ_Percentile      = round(percent_rank(CMJ)      * 100),
         SHLDISOY_Percentile = round(percent_rank(SHLDISOY) * 100),
-        ShotPut_Percentile  = round(percent_rank(ShotPut)  * 100),
         ISOTrunk_Percentile = round(percent_rank(ISOTrunk) * 100),
         Trunk_Percentile    = round(percent_rank(Trunk)    * 100)
       )
@@ -2642,14 +2514,13 @@ server <- function(input, output, session) {
           Metric == "IBSQT_Percentile"    ~ "IBSQT",
           Metric == "CMJ_Percentile"      ~ "CMJ",
           Metric == "SHLDISOY_Percentile" ~ "SHLDISOY",
-          Metric == "ShotPut_Percentile"  ~ "Shot Put",
           Metric == "ISOTrunk_Percentile" ~ "ISO Trunk",
           Metric == "Trunk_Percentile"    ~ "Trunk",
           TRUE                             ~ Metric
         ),
         Metric = factor(
           Metric,
-          levels = c("Shot Put", "SHLDISOY", "Trunk", "ISO Trunk", "CMJ", "IBSQT")
+          levels = c("SHLDISOY", "Trunk", "ISO Trunk", "CMJ", "IBSQT")
         )
       )
   })
@@ -2701,8 +2572,7 @@ server <- function(input, output, session) {
         Date >= input$date_range_strength[1],
         Date <= input$date_range_strength[2]
       ) %>%
-      select(Date, Name, IBSQT, CMJ, SHLDISOY, `Dynamo - Trunk`, `External Rotation`, `Internal Rotation`, 
-             ProteusFullTest, TrunkRotation, D2Ext, D2Flex, ShotPut, Weight)
+      select(Date, Name, IBSQT, CMJ, SHLDISOY, ProteusFullTest, TrunkRotation, D2Ext, D2Flex, Weight)
   })
   
   observeEvent(strength_trend_plot_data(), {
@@ -2713,17 +2583,11 @@ server <- function(input, output, session) {
                           "CMJ"   = "CMJ",
                           "SHLDISOY" = "SHLDISOY"
                         ),
-                        "Dynamo" = list(
-                          "ISO Trunk Rotation"   = "Dynamo - Trunk",
-                          "Shoudler ER"   = "External Rotation",
-                          "Shoulder IR" = "Internal Rotation"
-                        ),
                         "Proteus" = list(
                           "Power Score" = "ProteusFullTest",
                           "Trunk Rotation" = "TrunkRotation",
                           "D2 Extension"   = "D2Ext",
                           "D2 Flexion"   = "D2Flex",
-                          "Shot Put" = "ShotPut"
                         ),
                         "Other" = list(
                           "Weight" = "Weight"
@@ -2890,62 +2754,6 @@ server <- function(input, output, session) {
       )
   })
   
-  dynamo_summary_data <- eventReactive(input$get_profile_strength, {
-    req(input$selected_athlete_strength, input$date_range_strength)
-    strength_data %>%
-      filter(
-        Name == input$selected_athlete_strength,
-        Date >= input$date_range_strength[1],
-        Date <= input$date_range_strength[2]
-      ) %>%
-      summarise(
-        `Internal Rotation`  = if (all(is.na(`Internal Rotation`)))    NA_real_ else mean(`Internal Rotation`,    na.rm = TRUE),
-        `External Rotation`  = if (all(is.na(`External Rotation`)))    NA_real_ else mean(`External Rotation`,    na.rm = TRUE),
-        `ISO Trunk Rotation` = if (all(is.na(`Dynamo - Trunk`)))    NA_real_ else mean(`Dynamo - Trunk`,    na.rm = TRUE)
-      )
-  })
-  
-  output$dynamo_summary_table <- render_gt({
-    df <- dynamo_summary_data()
-    req(nrow(df) > 0)
-    
-    df %>%
-      gt() %>%
-      tab_header(
-        title = html(
-          '<div style="display: flex; align-items: center; text-align: center; width: 100%;">
-        <hr style="flex-grow: 1; border: none; height: 1px; background-color: #000000;">
-        <span style="padding: 0 50px; font-weight: 400; font-size: 24px; color: #5a5a5a;">Dynamo Metrics</span>
-        <hr style="flex-grow: 1; border: none; height: 1px; background-color: #000000;">
-      </div>'
-        )
-      ) %>%
-      tab_options(
-        table.width = px(1260),
-        heading.align = "center",
-        heading.background.color = "white",
-        heading.title.font.size = "small",
-        table.border.top.style   = "hidden"
-      ) %>%
-      tab_style(
-        style = list(
-          cell_fill(color = "#2D89C8"),
-          cell_text(color = "white", weight = "bold", align = "center")
-        ),
-        locations = cells_column_labels(everything())
-      ) %>% 
-      tab_style(
-        style = cell_text(align = "center"),
-        locations = cells_body(everything())
-      ) %>%
-      cols_width(
-        everything() ~ px(420)
-      ) %>% 
-      sub_missing(
-        columns = everything()
-      )
-  })
-  
   proteus_summary_data <- eventReactive(input$get_profile_strength, {
     req(input$selected_athlete_strength, input$date_range_strength)
     strength_data %>%
@@ -2958,8 +2766,7 @@ server <- function(input, output, session) {
         `Power Score`    = round(mean(ProteusFullTest, na.rm = TRUE), 1),
         `D2 Extension`   = round(mean(D2Ext, na.rm = TRUE), 1),
         `D2 Flexion`     = round(mean(D2Flex, na.rm = TRUE), 1),
-        `Trunk Rotation` = round(mean(TrunkRotation, na.rm = TRUE), 1),
-        `Shot Put`       = round(mean(ShotPut, na.rm = TRUE), 1)
+        `Trunk Rotation` = round(mean(TrunkRotation, na.rm = TRUE), 1)
       )
   })
   
@@ -3014,9 +2821,7 @@ server <- function(input, output, session) {
   observeEvent(input$show_forceplate_table, {
     selected_strength_table("forceplate")
   })
-  observeEvent(input$show_dynamo_table, {
-    selected_strength_table("dynamo")
-  })
+
   observeEvent(input$show_proteus_table, {
     selected_strength_table("proteus")
   })
@@ -3028,11 +2833,6 @@ server <- function(input, output, session) {
            forceplate = layout_columns(
              div(style = "margin: 0 auto 30px auto;",
                  gt_output("forceplate_summary_table")
-             )
-           ),
-           dynamo   = layout_columns(
-             div(style = "margin: 0 auto 30px auto;",
-                 gt_output("dynamo_summary_table")
              )
            ),
            proteus   = layout_columns(
@@ -3541,7 +3341,7 @@ server <- function(input, output, session) {
     metric_choices <- switch(input$percentile_department,
                              "Hitting"   = c("Max EV" = "MaxVel", "Avg EV" = "AvgVel", "Max Dist" = "MaxDist", "Avg Dist" = "AvgDist", "Bat Speed" = "bat_speed", "Rotational Acceleration" = "rotational_acceleration"),
                              "Pitching"  = c("Max FB" = "Max_RelSpeed", "Avg FB" = "Avg_RelSpeed", "FB Extension" = "Extension"),
-                             "Strength"  = c("IBSQT", "CMJ", "SHLDISOY", "Trunk Rotation" = "TrunkRotation", "Shot Put" = "ShotPut", "D2 Ext/Flex" = "D2Average"),
+                             "Strength"  = c("IBSQT", "CMJ", "SHLDISOY", "Trunk Rotation" = "TrunkRotation", "D2 Ext/Flex" = "D2Average"),
                              "Speed"     = c("Early Acceleration" = "early_acceleration", "Late Acceleration" = "late_acceleration", "30 Yard" = "thirty_yard", "40 Yard" = "forty_yard", "Top Speed" = "max_velocity"),
                              character(0)
     )
