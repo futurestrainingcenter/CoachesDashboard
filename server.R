@@ -20,13 +20,13 @@ source("HittingProspectReport.R", local = TRUE)
 
 
 server <- function(input, output, session) {
-  
+
   # ── Load data once at startup ──────────────────────────────────────
   hitting_data <- readRDS("HittingFacilityData.rds") %>%
     filter(!`Service Name` %in% c(
-      "Baseball Cage Rental L1", "Baseball Cage Rental L2", "Baseball Cage Rental L3", 
+      "Baseball Cage Rental L1", "Baseball Cage Rental L2", "Baseball Cage Rental L3",
       "Softball Cage Rental L1", "Softball Cage Rental L2", "Softball Cage Rental L3"))
-  
+
   hittrax_data   <- readRDS("HittraxData.rds")
   pitching_data  <- readRDS("PitchingFacilityData.rds")
   trackman_data  <- readRDS("TrackmanData.rds")
@@ -42,15 +42,15 @@ server <- function(input, output, session) {
   # breaking_params <- readRDS("breaking_scaling_params.rds")
   # offspeed_model  <- readRDS("offspeed_model.rds")
   # offspeed_params <- readRDS("offspeed_scaling_params.rds")
-  
+
   # ── Facility dropdowns ───────────────────────────────────────────
-  
+
   # Add reactive values to store filter states at the beginning of your server function
   filter_values <- reactiveValues(
     date_range = NULL,
     level = NULL
   )
-  
+
   # Modified date range UI
   output$facility_date_range_ui <- renderUI({
     data <- switch(input$facility_metric,
@@ -63,31 +63,31 @@ server <- function(input, output, session) {
                    "VALD"      = speed_data
     )
     req(data)
-    
+
     # Use stored values if they exist, otherwise use defaults
     start_date <- if(!is.null(filter_values$date_range)) {
       filter_values$date_range[1]
     } else {
       Sys.Date() %m-% months(6)
     }
-    
+
     end_date <- if(!is.null(filter_values$date_range)) {
       filter_values$date_range[2]
     } else {
       Sys.Date()
     }
-    
+
     dateRangeInput("facility_date_range", "Select Date Range:",
-                   start = start_date, 
-                   end = end_date, 
+                   start = start_date,
+                   end = end_date,
                    width = '280px')
   })
-  
+
   # Observer to update stored date range
   observeEvent(input$facility_date_range, {
     filter_values$date_range <- input$facility_date_range
   })
-  
+
   # Modified level UI
   output$facility_level_ui <- renderUI({
     data <- switch(input$facility_metric,
@@ -100,9 +100,9 @@ server <- function(input, output, session) {
                    "VALD"      = speed_data
     )
     req(data)
-    
+
     available_levels <- sort(unique(data$Level))
-    
+
     # Use stored values if they exist and are still valid
     selected_levels <- if(!is.null(filter_values$level)) {
       # Keep only the levels that exist in the current dataset
@@ -110,24 +110,24 @@ server <- function(input, output, session) {
     } else {
       c("L1", "L2", "L3")
     }
-    
+
     # If no valid selections remain, use defaults
     if(length(selected_levels) == 0) {
       selected_levels <- intersect(c("L1", "L2", "L3"), available_levels)
     }
-    
+
     pickerInput("facility_level", "Select Level:",
                 choices = available_levels,
                 selected = selected_levels,
                 multiple = TRUE,
                 width = '225px')
   })
-  
+
   # Observer to update stored level
   observeEvent(input$facility_level, {
     filter_values$level <- input$facility_level
   })
-  
+
   output$facility_service_ui <- renderUI({
     data <- switch(input$facility_metric,
                    "HitTrax"    = hitting_data,
@@ -139,7 +139,7 @@ server <- function(input, output, session) {
                    "VALD"       = speed_data
     )
     req(data)
-    
+
     default_selected <- switch(input$facility_metric,
                                "HitTrax"  = c("Baseball Hitting L1", "Baseball Hitting L2", "Baseball Hitting L3", "Learning Academy"),
                                "Blast"    = c("Baseball Hitting L1", "Baseball Hitting L2", "Baseball Hitting L3", "Learning Academy"),
@@ -150,19 +150,19 @@ server <- function(input, output, session) {
                                "VALD"    = c("Speed L1", "Speed L1/L2", "Speed L2", "Speed L2/L3", "Speed L3", "Learning Academy"),
                                character(0)
     )
-    
+
     pickerInput("facility_service", "Select Service Name:",
                 choices = sort(unique(data$`Service Name`)),
                 selected = default_selected,
                 multiple = TRUE,
                 width =  '225px')
   })
-  
+
   output$facility_gender_ui <- renderUI({
     if (input$facility_metric %in% c("Trackman", "Armcare")) {
       return(NULL)
     }
-    
+
     data <- switch(input$facility_metric,
                    "HitTrax"    = hitting_data,
                    "Blast"      = hitting_data,
@@ -171,14 +171,14 @@ server <- function(input, output, session) {
                    "VALD"       = speed_data
     )
     req(data)
-    
+
     pickerInput("facility_gender", "Select Gender:",
                 choices = c("Male", "Female"),
                 selected = c("Male", "Female"),
                 multiple = TRUE,
                 width =  '225px')
   })
-  
+
   output$facility_attendance_ui <- renderUI({
     data <- switch(input$facility_metric,
                    "HitTrax"   = hitting_data,
@@ -196,11 +196,11 @@ server <- function(input, output, session) {
                 multiple = TRUE,
                 width =  '225px')
   })
-  
-  
+
+
   generate_hittrax_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
+
     # Step 1: Main data with improvements
     df <- hitting_data %>%
       filter(
@@ -245,7 +245,7 @@ server <- function(input, output, session) {
           metric_col == "HHP"     ~ "Hard Hit %"
         )
       )
-    
+
     # Step 2: Grouped data for display table
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -255,7 +255,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: True summary row based on all data (not service averages)
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -266,10 +266,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine into final table
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -320,10 +320,10 @@ server <- function(input, output, session) {
       ) %>%
       sub_missing()
   }
-  
+
   generate_blast_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
+
     # Step 1: Prepare base data
     df <- hitting_data %>%
       filter(
@@ -357,7 +357,7 @@ server <- function(input, output, session) {
           metric_col == "rotational_acceleration" ~ "Rotational Acceleration"
         )
       )
-    
+
     # Step 2: Group by Service and Exercise
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -367,7 +367,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,     na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: True summary row based on all underlying data
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -378,10 +378,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,     na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine summary row with main data
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table with styled summary row
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -431,10 +431,10 @@ server <- function(input, output, session) {
         `Average % Improvement` ~ px(220)
       )
   }
-  
+
   generate_trackman_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_attendance)
-    
+
     # Step 1: Main data with improvements
     df <- pitching_data %>%
       filter(
@@ -477,7 +477,7 @@ server <- function(input, output, session) {
           metric_col == "Strike_Percentage" ~ "Strike %"
         )
       )
-    
+
     # Step 2: Grouped data for display table
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -487,7 +487,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: True summary row based on all data (not service averages)
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -498,10 +498,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine into final table
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -552,10 +552,10 @@ server <- function(input, output, session) {
       ) %>%
       sub_missing()
   }
-  
+
   generate_armcare_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
+
     # Step 1: Main data with improvements
     df <- pitching_data %>%
       filter(
@@ -594,7 +594,7 @@ server <- function(input, output, session) {
           metric_col == "total_strength"  ~ "Total Strength",
         )
       )
-    
+
     # Step 2: Grouped data for display table
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -604,7 +604,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: True summary row based on all data
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -615,10 +615,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine into final table
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -669,10 +669,10 @@ server <- function(input, output, session) {
       ) %>%
       sub_missing()
   }
-  
+
   generate_forceplate_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
+
     # Step 1: Main data with improvements
     df <- strength_data %>%
       filter(
@@ -710,7 +710,7 @@ server <- function(input, output, session) {
           metric_col == "SHLDISOY"  ~ "SHLDISOY"
         )
       )
-    
+
     # Step 2: Grouped data
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -720,7 +720,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: Summary row based on all data
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -731,10 +731,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine final table
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -785,11 +785,11 @@ server <- function(input, output, session) {
       ) %>%
       sub_missing()
   }
-  
-  
+
+
   generate_proteus_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
+
     # Step 1: Main data with improvements
     df <- strength_data %>%
       filter(
@@ -814,7 +814,7 @@ server <- function(input, output, session) {
         Last       = last(Value,  na_rm = TRUE),
         OverallAvg = mean(Value,  na.rm = TRUE),
         .groups    = "drop"
-      ) %>% 
+      ) %>%
       mutate(
         Improvement = Last - First,
         Percent = case_when(
@@ -827,7 +827,7 @@ server <- function(input, output, session) {
           metric_col == "D2Ext"         ~ "D2 Extension"
         )
       )
-    
+
     # Step 2: Grouped data for display table
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -837,7 +837,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: True summary row based on all data
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -848,10 +848,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine into final table
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -902,10 +902,10 @@ server <- function(input, output, session) {
       ) %>%
       sub_missing()
   }
-  
+
   generate_smartspeed_gt <- function() {
     req(input$facility_date_range, input$facility_level, input$facility_service, input$facility_gender, input$facility_attendance)
-    
+
     # Step 1: Main data with improvements
     df <- speed_data %>%
       filter(
@@ -949,7 +949,7 @@ server <- function(input, output, session) {
           metric_col == "max_velocity"        ~ "Top Speed"
         )
       )
-    
+
     # Step 2: Grouped data for display table
     df_grouped <- df %>%
       group_by(`Service Name`, Exercise) %>%
@@ -959,7 +959,7 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 3: True summary row based on all data
     summary_row <- df %>%
       group_by(Exercise) %>%
@@ -970,10 +970,10 @@ server <- function(input, output, session) {
         `Average % Improvement` = round(mean(Percent,          na.rm = TRUE), 2),
         .groups = "drop"
       )
-    
+
     # Step 4: Combine into final table
     df_final <- bind_rows(summary_row, df_grouped)
-    
+
     # Step 5: Generate gt table
     df_final %>%
       gt(groupname_col = "Exercise", rowname_col = "Service Name") %>%
@@ -1024,10 +1024,10 @@ server <- function(input, output, session) {
       ) %>%
       sub_missing()
   }
-  
+
   output$facility_progression_table <- render_gt({
     req(input$facility_metric)
-    
+
     switch(input$facility_metric,
            "HitTrax"   = generate_hittrax_gt(),
            "Blast"     = generate_blast_gt(),
@@ -1038,81 +1038,81 @@ server <- function(input, output, session) {
            "VALD"      = generate_smartspeed_gt()
     )
   })
-  
-  
+
+
   # ── Dynamic athlete dropdowns ─────────────────────────────────────
   observeEvent(input$date_range_hitting, {
     req(input$date_range_hitting)
-    
+
     choices <- hitting_data %>%
       filter(Date >= input$date_range_hitting[1],
              Date <= input$date_range_hitting[2]) %>%
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-    
+
     current <- isolate(input$selected_athlete_hitting)
     selected <- if (current %in% choices) current else ""
-    
+
     updateSelectInput(session, "selected_athlete_hitting",
                       choices = c("Select an Athlete" = "", choices),
                       selected = selected)
   })
-  
+
   observeEvent(input$date_range_pitching, {
     req(input$date_range_pitching)
-    
+
     choices <- pitching_data %>%
       filter(Date >= input$date_range_pitching[1],
              Date <= input$date_range_pitching[2]) %>%
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-    
+
     current <- isolate(input$selected_athlete_pitching)
     selected <- if (current %in% choices) current else ""
-    
+
     updateSelectInput(session, "selected_athlete_pitching",
                       choices = c("Select an Athlete" = "", choices),
                       selected = selected)
   })
-  
+
   observeEvent(input$date_range_strength, {
     req(input$date_range_strength)
-    
+
     choices <- strength_data %>%
       filter(Date >= input$date_range_strength[1],
              Date <= input$date_range_strength[2]) %>%
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-    
+
     current <- isolate(input$selected_athlete_strength)
     selected <- if (current %in% choices) current else ""
-    
+
     updateSelectInput(session, "selected_athlete_strength",
                       choices = c("Select an Athlete" = "", choices),
                       selected = selected)
   })
-  
+
   observeEvent(input$date_range_speed, {
     req(input$date_range_speed)
-    
+
     choices <- speed_data %>%
       filter(Date >= input$date_range_speed[1],
              Date <= input$date_range_speed[2]) %>%
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-    
+
     current <- isolate(input$selected_athlete_speed)
     selected <- if (current %in% choices) current else ""
-    
+
     updateSelectInput(session, "selected_athlete_speed",
                       choices = c("Select an Athlete" = "", choices),
                       selected = selected)
   })
-  
+
   # ── function to build profile UI ───────────────────────────
   generate_profile_ui <- function(athlete) {
     req(athlete)
@@ -1133,35 +1133,35 @@ server <- function(input, output, session) {
       )
     )
   }
-  
+
   selected_athlete_hitting_event <- eventReactive(input$get_profile_hitting, {
     input$selected_athlete_hitting
   })
   selected_athlete_pitching_event <- eventReactive(input$get_profile_pitching, {
     input$selected_athlete_pitching
   })
-  
+
   selected_athlete_strength_event <- eventReactive(input$get_profile_strength, {
     input$selected_athlete_strength
   })
-  
+
   selected_athlete_speed_event <- eventReactive(input$get_profile_speed, {
     input$selected_athlete_speed
   })
-  
+
   # ── Render profile UIs ────────────────────────────────────────────
   output$athlete_profile_hitting  <- renderUI({ req(input$get_profile_hitting);  isolate(generate_profile_ui(input$selected_athlete_hitting)) })
   output$athlete_profile_pitching <- renderUI({ req(input$get_profile_pitching); isolate(generate_profile_ui(input$selected_athlete_pitching)) })
   output$athlete_profile_strength <- renderUI({ req(input$get_profile_strength); isolate(generate_profile_ui(input$selected_athlete_strength)) })
   output$athlete_profile_speed    <- renderUI({ req(input$get_profile_speed);    isolate(generate_profile_ui(input$selected_athlete_speed)) })
-  
+
   # ── HITTING: data + plots ─────────────────────────────────────────
-  
+
   hitting_plot_data <- eventReactive(input$get_profile_hitting, {
     req(input$selected_athlete_hitting, input$date_range_hitting)
     athlete    <- input$selected_athlete_hitting
     date_range <- input$date_range_hitting
-    
+
     # 1. athlete summary ON the date‐range
     athlete_summary <- hitting_data %>%
       filter(Name == athlete,
@@ -1171,7 +1171,7 @@ server <- function(input, output, session) {
         Name                   = first(Name),
         Level                  = first(Level),
         Gender                 = first(Gender),
-        
+
         MaxVel                 = if(all(is.na(MaxVel))) NA_real_ else max(MaxVel, na.rm = TRUE),
         AvgVel                 = if(all(is.na(AvgVel))) NA_real_ else mean(AvgVel, na.rm = TRUE),
         MaxDist                = if(all(is.na(MaxDist))) NA_real_ else max(MaxDist, na.rm = TRUE),
@@ -1179,7 +1179,7 @@ server <- function(input, output, session) {
         rotational_acceleration = if(all(is.na(rotational_acceleration))) NA_real_ else mean(rotational_acceleration, na.rm = TRUE),
         .groups = "drop"
       )
-    
+
     # 2. facility summary OVER ALL DATES (or whatever span)
     facility_summary <- hitting_data %>%
       filter(Level  == athlete_summary$Level,
@@ -1193,11 +1193,11 @@ server <- function(input, output, session) {
         rotational_acceleration = if(all(is.na(rotational_acceleration))) NA_real_ else mean(rotational_acceleration, na.rm = TRUE),
         .groups = "drop"
       )
-    
+
     facility_override <- facility_summary %>%
       filter(Name != athlete) %>%
       bind_rows(athlete_summary)
-    
+
     facility_with_pct <- facility_override %>%
       mutate(
         MaxVel_Percentile = case_when(
@@ -1226,10 +1226,10 @@ server <- function(input, output, session) {
           TRUE                    ~ round(percent_rank(rotational_acceleration)       * 100)
         )
       )
-    
+
     athlete_percentiles <- facility_with_pct %>%
       filter(Name == athlete) %>%
-      select(ends_with("_Percentile")) %>% 
+      select(ends_with("_Percentile")) %>%
       pivot_longer(
         cols      = everything(),
         names_to  = "Metric",
@@ -1247,11 +1247,11 @@ server <- function(input, output, session) {
         Metric = factor(Metric, levels = c("Rot Accel","Bat Speed","Max Dist","Avg EV","Max EV"))
       )
   })
-  
+
   output$hitting_percentile_plot <- renderPlot({
     req(input$get_profile_hitting)
     df <- hitting_plot_data()
-    
+
     ggplot(df, aes(x = Percentile, y = Metric, color = Percentile)) +
       geom_segment(aes(x = 0,    xend = 100, y = Metric, yend = Metric), color = "#B9CED0", linewidth = 2) +
       geom_segment(aes(x = -2.5, xend = Percentile, y = Metric, yend = Metric, color = Percentile), linewidth = 10) +
@@ -1271,21 +1271,21 @@ server <- function(input, output, session) {
         panel.background  = element_blank()
       )
   })
-  
+
   output$futures_score_hitting <- renderUI({
     req(input$get_profile_hitting)
     df <- hitting_plot_data()
     avg_pct <- mean(df$Percentile, na.rm = TRUE)
     score   <- avg_pct / 10
     if (is.na(score)) return(NULL)
-    
+
     div(
       style = "display: flex; gap: 20px; justify-content: center; align-items: center;",
       tags$img(src = "black_logo.png", style = "height: 50px; width: auto;"),
       div(round(score, 1), style = "font-size: 48px; font-weight: bold;")
     )
   })
-  
+
   # Trend-plot data + UI
   trend_plot_data <- eventReactive(input$get_profile_hitting, {
     req(input$selected_athlete_hitting, input$date_range_hitting)
@@ -1297,7 +1297,7 @@ server <- function(input, output, session) {
       ) %>%
       select(Date, Name, MaxVel, AvgVel, MaxDist, AvgDist, bat_speed, rotational_acceleration)
   })
-  
+
   observeEvent(trend_plot_data(), {
     updatePickerInput(session, "trend_metric",
                       choices = list(
@@ -1315,7 +1315,7 @@ server <- function(input, output, session) {
                       selected = "MaxVel"
     )
   })
-  
+
   output$hitting_trend_plot <- renderPlotly({
     req(input$get_profile_hitting, input$trend_metric, input$trend_grouping)
     pd <- trend_plot_data() %>%
@@ -1335,7 +1335,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       arrange(GroupDate)
-    
+
     if (nrow(pd) == 0) {
       return(
         plot_ly() %>%
@@ -1349,16 +1349,16 @@ server <- function(input, output, session) {
           )
       )
     }
-    
+
     # calculate first & last values
     first_val  <- pd$Value[1]
     last_val   <- pd$Value[nrow(pd)]
     num_change <- round(last_val - first_val, 1)
     pct_change <- round((num_change / first_val) * 100, 1)
-    
+
     # decide on color based on sign
     subtitle_color <- if (num_change >= 0) "#008000" else "#FF0000"
-    
+
     # build the HTML‐styled subtitle
     subtitle_txt <- paste0(
       "<sup style='font-size:14px;color:", subtitle_color, ";'>",
@@ -1366,7 +1366,7 @@ server <- function(input, output, session) {
       " (", if (pct_change >= 0) "+" else "", pct_change, "%)",
       "</sup>"
     )
-    
+
     xaxis_args <- list(
       title      = "",
       tickformat = if (input$trend_grouping == "month") "%b %Y" else "%b %d",
@@ -1376,7 +1376,7 @@ server <- function(input, output, session) {
       xaxis_args$tickmode <- "array"
       xaxis_args$tickvals <- unique(pd$GroupDate)
     }
-    
+
     plot_ly(
       data = pd,
       x    = ~GroupDate,
@@ -1394,7 +1394,7 @@ server <- function(input, output, session) {
             input$trend_metric, " by ",
             if (input$trend_grouping == "month") "Month" else "Date",
             "<br>",
-            subtitle_txt 
+            subtitle_txt
           ),
           x = 0.5
         ),
@@ -1422,7 +1422,7 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   # build the summary only once you click “Get Profile”
   hittrax_summary_data <- eventReactive(input$get_profile_hitting, {
     req(input$selected_athlete_hitting, input$date_range_hitting)
@@ -1438,7 +1438,7 @@ server <- function(input, output, session) {
         `Max Dist` = round(max(Distance, na.rm = TRUE)),
         `Avg Dist` = round(mean(Distance, na.rm = TRUE))
       )
-    
+
     summary_hitting <- hitting_data %>%
       filter(
         Name == input$selected_athlete_hitting,
@@ -1452,15 +1452,15 @@ server <- function(input, output, session) {
         `Hard Hit %` = round(sum(HHC, na.rm = TRUE) / sum(HC, na.rm = TRUE) * 100, 1),
         `Barrel %`   = round(sum(Barrels, na.rm = TRUE) / sum(HC, na.rm = TRUE) * 100, 1),
       )
-    
+
     combined_summary <- bind_cols(summary_hittrax, summary_hitting)
-    
+
   })
-  
+
   output$hittrax_summary_table <- render_gt({
     df <- hittrax_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
       gt() %>%
       tab_header(
@@ -1485,19 +1485,19 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       tab_style(
         style = cell_text(align = "center"),
         locations = cells_body(everything())
       ) %>%
       cols_width(
         everything() ~ px(140)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   blast_summary_data <- eventReactive(input$get_profile_hitting, {
     req(input$selected_athlete_hitting, input$date_range_hitting)
     hitting_data %>%
@@ -1517,11 +1517,11 @@ server <- function(input, output, session) {
         TTC    = round(mean(time_to_contact, na.rm = TRUE), 2),
       )
   })
-  
+
   output$blast_summary_table <- render_gt({
     df <- blast_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
       gt() %>%
       tab_header(
@@ -1582,19 +1582,19 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       tab_style(
         style = cell_text(align = "center"),
         locations = cells_body(everything())
       ) %>%
       cols_width(
         everything() ~ px(157.5)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   standard_summary_data <- eventReactive(input$get_profile_hitting, {
     req(input$selected_athlete_hitting, input$date_range_hitting)
     hittrax_data %>%
@@ -1616,11 +1616,11 @@ server <- function(input, output, session) {
         SLG = round((`1B` + 2*`2B` + 3*`3B` + 4*HR) / AB, 3)
       )
   })
-  
+
   output$standard_summary_table <- render_gt({
     df <- standard_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
       gt() %>%
       tab_header(
@@ -1645,36 +1645,36 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       tab_style(
         style = cell_text(align = "center"),
         locations = cells_body(everything())
       ) %>%
       cols_width(
         everything() ~ px(157.5)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   # inside server()
   selected_hitting_table <- reactiveVal("hittrax")
-  
+
   observeEvent(input$get_profile_hitting, {
     selected_hitting_table("hittrax")
   })
-  
+
   observeEvent(input$show_hittrax_table, {
     selected_hitting_table("hittrax")
   })
   observeEvent(input$show_blast_table, {
     selected_hitting_table("blast")
   })
-  
+
   output$hitting_summary_tables <- renderUI({
     req(input$get_profile_hitting, selected_hitting_table())
-    
+
     switch(selected_hitting_table(),
            hittrax = layout_columns(
              div(style = "margin: 0 auto 30px auto;",
@@ -1688,26 +1688,26 @@ server <- function(input, output, session) {
            )
     )
   })
-  
+
   output$early_connection_value <- renderText({
     req(blast_summary_data())
     paste0(blast_summary_data()$EC, "°")
   })
-  
+
   output$ope_value <- renderText({
     req(blast_summary_data())
     paste0(blast_summary_data()$OPE, "%")
   })
-  
+
   output$connection_impact_value <- renderText({
     req(blast_summary_data())
     paste0(blast_summary_data()$CxI, "°")
   })
-  
+
   output$early_connection_img <- renderUI({
     req(blast_summary_data())
     value <- blast_summary_data()$EC
-    
+
     img_src <- if (is.na(value)) {
       "EC_blank.png"
     } else if (value < 80) {
@@ -1717,28 +1717,28 @@ server <- function(input, output, session) {
     } else {
       "EC_at_90.png"
     }
-    
+
     tags$img(src = img_src, style = "width: 300px; height: auto; margin-top: 30px;")
   })
-  
+
   output$ope_img <- renderUI({
     req(blast_summary_data())
     value <- blast_summary_data()$OPE
-    
+
     img_src <- if (is.na(value)) {
       "OPE_blank.png"
     } else {
       updated_value <- round(value / 5) * 5
       paste0("OPE", updated_value, ".png")
     }
-    
+
     tags$img(src = img_src, style = "width: 300px; height: auto; margin-top: 30px;")
   })
-  
+
   output$connection_impact_img <- renderUI({
     req(blast_summary_data())
     value <- blast_summary_data()$CxI
-    
+
     img_src <- if (is.na(value)) {
       "CI_blank.png"
     } else if (value < 80) {
@@ -1748,27 +1748,27 @@ server <- function(input, output, session) {
     } else {
       "CI_at_90.png"
     }
-    
+
     tags$img(src = img_src, style = "width: 300px; height: auto; margin-top: 30px;")
   })
-  
+
   # ── PITCHING: data + plots ──────────────────────────────────────
-  
+
   pitching_plot_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
     athlete    <- input$selected_athlete_pitching
     date_range <- input$date_range_pitching
-    
+
     # 1. athlete summary ON the date‐range
     athlete_summary <- pitching_data %>%
       filter(Name == athlete,
              Date >= date_range[1],
              Date <= date_range[2]) %>%
-      arrange(desc(Date)) %>% 
+      arrange(desc(Date)) %>%
       summarise(
         Name    = first(Name),
         Level   = first(Level),
-        
+
         MaxRelSpeed     = if (all(is.na(Max_RelSpeed)))    NA_real_ else max(Max_RelSpeed,   na.rm = TRUE),
         AvgRelSpeed     = if (all(is.na(Avg_RelSpeed)))    NA_real_ else mean(Avg_RelSpeed,  na.rm = TRUE),
         Extension       = if (all(is.na(Extension)))       NA_real_ else mean(Extension,    na.rm = TRUE),
@@ -1776,17 +1776,17 @@ server <- function(input, output, session) {
         ertarm_strength = if (all(is.na(ertarm_strength))) NA_real_ else mean(ertarm_strength, na.rm = TRUE),
         starm_strength  = if (all(is.na(starm_strength)))  NA_real_ else mean(starm_strength,  na.rm = TRUE),
         gtarm_strength  = if (all(is.na(gtarm_strength)))  NA_real_ else mean(gtarm_strength,  na.rm = TRUE),
-        
+
         .groups = "drop"
       )
-    
+
     # 2. facility summary OVER ALL DATES (same Level & Gender)
     facility_summary <- pitching_data %>%
       filter(Level  == athlete_summary$Level) %>%
       group_by(Name) %>%
       summarise(
         Level            = first(Level),
-        
+
         MaxRelSpeed     = if (all(is.na(Max_RelSpeed)))    NA_real_ else max(Max_RelSpeed,   na.rm = TRUE),
         AvgRelSpeed     = if (all(is.na(Avg_RelSpeed)))    NA_real_ else mean(Avg_RelSpeed,  na.rm = TRUE),
         Extension       = if (all(is.na(Extension)))       NA_real_ else mean(Extension,    na.rm = TRUE),
@@ -1794,15 +1794,15 @@ server <- function(input, output, session) {
         ertarm_strength = if (all(is.na(ertarm_strength))) NA_real_ else mean(ertarm_strength, na.rm = TRUE),
         starm_strength  = if (all(is.na(starm_strength)))  NA_real_ else mean(starm_strength,  na.rm = TRUE),
         gtarm_strength  = if (all(is.na(gtarm_strength)))  NA_real_ else mean(gtarm_strength,  na.rm = TRUE),
-        
+
         .groups = "drop"
       )
-    
+
     # 3. drop the “old” athlete row & 4. bind in your date‐window athlete
     facility_override <- facility_summary %>%
       filter(Name != athlete) %>%
       bind_rows(athlete_summary)
-    
+
     # 5. compute percentiles (pnorm for Coll/Pro, percent_rank otherwise)
     facility_with_pct <- facility_override %>%
       mutate(
@@ -1826,7 +1826,7 @@ server <- function(input, output, session) {
         starm_Percentile   = round(percent_rank(starm_strength)  * 100),
         gtarm_Percentile   = round(percent_rank(gtarm_strength)  * 100)
       )
-    
+
     # 6. pivot athlete percentiles into two columns
     athlete_percentiles <- facility_with_pct %>%
       filter(Name == athlete) %>%
@@ -1850,11 +1850,11 @@ server <- function(input, output, session) {
         Metric = factor(Metric, levels = c("Grip","Scaption","ER","IR","Extension","Avg FB","Max FB"))
       )
   })
-  
+
   output$pitching_percentile_plot <- renderPlot({
     req(input$get_profile_pitching)
     df <- pitching_plot_data()
-    
+
     ggplot(df, aes(x = Percentile, y = Metric, color = Percentile)) +
       geom_segment(aes(x = 0,    xend = 100, y = Metric, yend = Metric), color = "#B9CED0", linewidth = 2) +
       geom_segment(aes(x = -2.5, xend = Percentile, y = Metric, yend = Metric, color = Percentile), linewidth = 10) +
@@ -1874,21 +1874,21 @@ server <- function(input, output, session) {
         panel.background  = element_blank()
       )
   })
-  
+
   output$futures_score_pitching <- renderUI({
     req(input$get_profile_pitching)
     df <- pitching_plot_data()
     avg_pct <- mean(df$Percentile, na.rm = TRUE)
     score   <- avg_pct / 10
     if (is.na(score)) return(NULL)
-    
+
     div(
       style = "display: flex; gap: 20px; justify-content: center; align-items: center;",
       tags$img(src = "black_logo.png", style = "height: 50px;"),
       div(round(score, 1), style = "font-size: 48px; font-weight: bold;")
     )
   })
-  
+
   pitching_trend_plot_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
     pitching_data %>%
@@ -1900,7 +1900,7 @@ server <- function(input, output, session) {
       ) %>%
       select(Date, Name, Max_RelSpeed, Avg_RelSpeed, Extension, total_strength, irtarm_strength, ertarm_strength, starm_strength, gtarm_strength)
   })
-  
+
   observeEvent(pitching_trend_plot_data(), {
     updatePickerInput(session, "pitching_trend_metric",
                       choices = list(
@@ -1920,7 +1920,7 @@ server <- function(input, output, session) {
                       selected = "Max_RelSpeed"
     )
   })
-  
+
   output$pitching_trend_plot <- renderPlotly({
     req(input$get_profile_pitching, input$pitching_trend_metric, input$pitching_trend_grouping)
     pd <- pitching_trend_plot_data() %>%
@@ -1938,9 +1938,9 @@ server <- function(input, output, session) {
           mean(.data[[input$pitching_trend_metric]], na.rm = TRUE)
         },
         .groups = "drop"
-      ) %>% 
+      ) %>%
       arrange(GroupDate)
-    
+
     if (nrow(pd) == 0) {
       return(
         plot_ly() %>%
@@ -1954,16 +1954,16 @@ server <- function(input, output, session) {
           )
       )
     }
-    
+
     # calculate first & last values
     first_val  <- pd$Value[1]
     last_val   <- pd$Value[nrow(pd)]
     num_change <- round(last_val - first_val, 1)
     pct_change <- round((num_change / first_val) * 100, 1)
-    
+
     # decide on color based on sign
     subtitle_color <- if (num_change >= 0) "#008000" else "#FF0000"
-    
+
     # build the HTML‐styled subtitle
     subtitle_txt <- paste0(
       "<sup style='font-size:14px;color:", subtitle_color, ";'>",
@@ -1971,7 +1971,7 @@ server <- function(input, output, session) {
       " (", if (pct_change >= 0) "+" else "", pct_change, "%)",
       "</sup>"
     )
-    
+
     xaxis_args <- list(
       title      = "",
       tickformat = if (input$pitching_trend_grouping == "month") "%b %Y" else "%b %d",
@@ -1981,7 +1981,7 @@ server <- function(input, output, session) {
       xaxis_args$tickmode <- "array"
       xaxis_args$tickvals <- unique(pd$GroupDate)
     }
-    
+
     plot_ly(
       data = pd,
       x    = ~GroupDate,
@@ -1999,7 +1999,7 @@ server <- function(input, output, session) {
             input$pitching_trend_metric, " by ",
             if (input$pitching_trend_grouping == "month") "Month" else "Date",
             "<br>",
-            subtitle_txt 
+            subtitle_txt
           ),
           x = 0.5
         ),
@@ -2027,7 +2027,7 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   # build the summary only once you click “Get Profile”
   trackman_summary_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
@@ -2054,23 +2054,23 @@ server <- function(input, output, session) {
         PlateLocSide = round(mean(PlateLocSide, na.rm = TRUE), 1),
         SpinAxis3dSpinEfficiency = round(mean(SpinAxis3dSpinEfficiency, na.rm = TRUE), 1),
         .groups = "drop"
-      ) %>% 
+      ) %>%
       mutate(
         Total_Pitches = sum(`# Thrown`),  # Total number of pitches thrown by athlete in that month
         `% Thrown` = round((`# Thrown` / Total_Pitches) * 100, 1)  # Percent usage of each TaggedPitchType
-      ) %>% 
-      select(TaggedPitchType, `# Thrown`, `% Thrown`, `Max Velo`, `Avg Velo`, IVB, HB, `Spin Rate`) %>% 
-      rename(Pitch = TaggedPitchType) %>% 
+      ) %>%
+      select(TaggedPitchType, `# Thrown`, `% Thrown`, `Max Velo`, `Avg Velo`, IVB, HB, `Spin Rate`) %>%
+      rename(Pitch = TaggedPitchType) %>%
       arrange(desc(`Max Velo`))
-    
+
   })
-  
+
   output$trackman_summary_table <- render_gt({
     df <- trackman_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
-      gt() %>% 
+      gt() %>%
       tab_header(
         title = html(
           '<div style="display: flex; align-items: center; text-align: center; width: 100%;">
@@ -2097,15 +2097,15 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       cols_width(
         everything() ~ px(157.5)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   # build the summary only once you click “Get Profile”
   armcare_summary_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
@@ -2117,8 +2117,8 @@ server <- function(input, output, session) {
         !is.na(arm_score)
       ) %>%
       select(arm_score, total_strength, shoulder_balance, irtarm_strength, irtarm_rom,
-             ertarm_strength, ertarm_rom, starm_strength, gtarm_strength, ftarm_rom) %>% 
-      distinct() %>% 
+             ertarm_strength, ertarm_rom, starm_strength, gtarm_strength, ftarm_rom) %>%
+      distinct() %>%
       summarise(
         `Total Strength` = round(mean(total_strength, na.rm = TRUE), 1),
         IR = round(mean(irtarm_strength, na.rm = TRUE), 1),
@@ -2129,15 +2129,15 @@ server <- function(input, output, session) {
         Grip = round(mean(gtarm_strength, na.rm = TRUE), 1),
         `Flexion ROM` = round(mean(ftarm_rom, na.rm = TRUE), 1)
       )
-    
+
   })
-  
+
   output$armcare_summary_table <- render_gt({
     df <- armcare_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
-      gt() %>% 
+      gt() %>%
       tab_header(
         title = html(
           '<div style="display: flex; align-items: center; text-align: center; width: 100%;">
@@ -2164,15 +2164,15 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       cols_width(
         everything() ~ px(157.5)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   # build the summary only once you click “Get Profile”
   advanced_summary_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
@@ -2193,20 +2193,20 @@ server <- function(input, output, session) {
         `Spin Eff` = round(mean((SpinAxis3dSpinEfficiency*100), na.rm = TRUE), 1),
         `Gyro Deg` = round(mean(SpinAxis3dLongitudinalAngle, na.rm = TRUE)),
         .groups = "drop"
-      ) %>% 
-      arrange(desc(`Max Velo`)) %>% 
-      select(TaggedPitchType, RelHeight, RelSide, Extension, VAA, HAA, `Spin Eff`, `Gyro Deg`) %>% 
+      ) %>%
+      arrange(desc(`Max Velo`)) %>%
+      select(TaggedPitchType, RelHeight, RelSide, Extension, VAA, HAA, `Spin Eff`, `Gyro Deg`) %>%
       rename(Pitch = TaggedPitchType)
-    
-    
+
+
   })
-  
+
   output$advanced_summary_table <- render_gt({
     df <- advanced_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
-      gt() %>% 
+      gt() %>%
       tab_header(
         title = html(
           '<div style="display: flex; align-items: center; text-align: center; width: 100%;">
@@ -2233,32 +2233,32 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       cols_width(
         everything() ~ px(157.5)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   # inside server()
   selected_pitching_table <- reactiveVal("trackman")
-  
+
   observeEvent(input$get_profile_pitching, {
     selected_pitching_table("trackman")
   })
-  
+
   observeEvent(input$show_trackman_table, {
     selected_pitching_table("trackman")
   })
   observeEvent(input$show_armcare_table, {
     selected_pitching_table("armcare")
   })
-  
+
   output$pitching_summary_tables <- renderUI({
     req(input$get_profile_pitching, selected_pitching_table())
-    
+
     switch(selected_pitching_table(),
            trackman = layout_columns(
              div(style = "margin: 0 auto 30px auto;",
@@ -2272,7 +2272,7 @@ server <- function(input, output, session) {
            )
     )
   })
-  
+
   trackman_plot_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
     trackman_data %>%
@@ -2282,7 +2282,7 @@ server <- function(input, output, session) {
         Date <= input$date_range_pitching[2]
       )
   })
-  
+
   release_movement_plot_data <- eventReactive(input$get_profile_pitching, {
     req(input$selected_athlete_pitching, input$date_range_pitching)
     trackman_data %>%
@@ -2291,17 +2291,17 @@ server <- function(input, output, session) {
         Date >= input$date_range_pitching[1],
         Date <= input$date_range_pitching[2]
       ) %>%
-      group_by(TaggedPitchType) %>% 
+      group_by(TaggedPitchType) %>%
       summarise(`Avg HorzBreak` = mean(HorzBreak, na.rm = TRUE),
                 `Avg VertBreak` = mean(InducedVertBreak, na.rm = TRUE),
                 `Avg RelSide` = mean(RelSide, na.rm = TRUE),
                 `Avg RelHeight` = mean(RelHeight, na.rm = TRUE))
   })
-  
+
   output$release_trend_plot <- renderPlotly({
     req(input$get_profile_pitching)
     pd <- release_movement_plot_data()
-    
+
     if (nrow(pd) == 0) {
       return(
         plot_ly() %>%
@@ -2315,7 +2315,7 @@ server <- function(input, output, session) {
           )
       )
     }
-    
+
     plot_ly() %>%
       add_markers(
         data = pd,
@@ -2341,7 +2341,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "", range = c(0, 8)),
         showlegend = FALSE,
         dragmode   = FALSE
-      ) %>% 
+      ) %>%
       config(
         displaylogo           = FALSE,
         scrollZoom            = FALSE,
@@ -2360,12 +2360,12 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   output$movement_trend_plot <- renderPlotly({
     req(input$get_profile_pitching)
     pd <- release_movement_plot_data()
     trackman <- trackman_plot_data()
-    
+
     if (nrow(pd) == 0) {
       return(
         plot_ly() %>%
@@ -2379,7 +2379,7 @@ server <- function(input, output, session) {
           )
       )
     }
-    
+
     plot_ly() %>%
       add_markers(
         data = trackman,
@@ -2422,7 +2422,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "", range = c(-30, 30), zeroline = TRUE, zerolinecolor = "lightgray"),
         showlegend = FALSE,
         dragmode   = FALSE
-      ) %>% 
+      ) %>%
       config(
         displaylogo           = FALSE,
         scrollZoom            = FALSE,
@@ -2441,15 +2441,15 @@ server <- function(input, output, session) {
         )
       )
   })
-  
-  
+
+
   # ── STRENGTH: data + plots ───────────────────────────────────────
-  
+
   strength_plot_data <- eventReactive(input$get_profile_strength, {
     req(input$selected_athlete_strength, input$date_range_strength)
     athlete    <- input$selected_athlete_strength
     date_range <- input$date_range_strength
-    
+
     # 1. Athlete summary within date range
     athlete_summary <- strength_data %>%
       filter(Name == athlete,
@@ -2460,14 +2460,16 @@ server <- function(input, output, session) {
         Name                   = first(Name),
         Level                  = first(Level),
         Gender                 = first(Gender),
-        
+
         IBSQT    = if (all(is.na(IBSQT)))    NA_real_ else max(IBSQT,    na.rm = TRUE),
         CMJ      = if (all(is.na(CMJ)))      NA_real_ else max(CMJ,       na.rm = TRUE),
         SHLDISOY = if (all(is.na(SHLDISOY))) NA_real_ else max(SHLDISOY,  na.rm = TRUE),
         Trunk    = if (all(is.na(TrunkRotation))) NA_real_ else max(TrunkRotation, na.rm = TRUE),
+        D2Ext = if (all(is.na(D2Ext)))       NA_real_ else max(D2Ext,  na.rm = TRUE),
+        D2Flex = if (all(is.na(D2Flex)))     NA_real_ else max(D2Flex,  na.rm = TRUE),
         .groups  = "drop"
       )
-    
+
     # 2. Facility summary over all dates (same Level)
     facility_summary <- strength_data %>%
       filter(
@@ -2482,24 +2484,27 @@ server <- function(input, output, session) {
         CMJ      = if (all(is.na(CMJ)))      NA_real_ else max(CMJ,       na.rm = TRUE),
         SHLDISOY = if (all(is.na(SHLDISOY))) NA_real_ else max(SHLDISOY,  na.rm = TRUE),
         Trunk    = if (all(is.na(TrunkRotation))) NA_real_ else max(TrunkRotation, na.rm = TRUE),
+        D2Ext = if (all(is.na(D2Ext)))       NA_real_ else max(D2Ext,  na.rm = TRUE),
+        D2Flex = if (all(is.na(D2Flex)))     NA_real_ else max(D2Flex,  na.rm = TRUE),
         .groups  = "drop"
       )
-    
+
     # 3. Replace facility’s old athlete row with date-range summary
     facility_override <- facility_summary %>%
       filter(Name != athlete) %>%
       bind_rows(athlete_summary)
-    
+
     # 4. Compute percentiles for each exercise
     facility_with_pct <- facility_override %>%
       mutate(
         IBSQT_Percentile    = round(percent_rank(IBSQT)    * 100),
         CMJ_Percentile      = round(percent_rank(CMJ)      * 100),
         SHLDISOY_Percentile = round(percent_rank(SHLDISOY) * 100),
-        ISOTrunk_Percentile = round(percent_rank(ISOTrunk) * 100),
-        Trunk_Percentile    = round(percent_rank(Trunk)    * 100)
+        Trunk_Percentile    = round(percent_rank(Trunk)    * 100),
+        D2Ext_Percentile    = round(percent_rank(D2Ext)    * 100),
+        D2Flex_Percentile   = round(percent_rank(D2Flex)   * 100)
       )
-    
+
     # 5. Pivot athlete percentiles into two columns
     athlete_percentiles <- facility_with_pct %>%
       filter(Name == athlete) %>%
@@ -2514,21 +2519,22 @@ server <- function(input, output, session) {
           Metric == "IBSQT_Percentile"    ~ "IBSQT",
           Metric == "CMJ_Percentile"      ~ "CMJ",
           Metric == "SHLDISOY_Percentile" ~ "SHLDISOY",
-          Metric == "ISOTrunk_Percentile" ~ "ISO Trunk",
           Metric == "Trunk_Percentile"    ~ "Trunk",
+          Metric == "D2Ext_Percentile"    ~ "D2 Ext",
+          Metric == "D2Flex_Percentile"   ~ "D2 Flex",
           TRUE                             ~ Metric
         ),
         Metric = factor(
           Metric,
-          levels = c("SHLDISOY", "Trunk", "ISO Trunk", "CMJ", "IBSQT")
+          levels = c("D2 Flex", "D2 Ext", "Trunk", "ISO Trunk", "SHLDISOY", "CMJ", "IBSQT")
         )
       )
   })
-  
+
   output$strength_percentile_plot <- renderPlot({
     req(input$get_profile_strength)
     df <- strength_plot_data()
-    
+
     ggplot(df, aes(x = Percentile, y = Metric, color = Percentile)) +
       geom_segment(aes(x = 0,    xend = 100, y = Metric, yend = Metric), color = "#B9CED0", linewidth = 2) +
       geom_segment(aes(x = -2.5, xend = Percentile, y = Metric, yend = Metric, color = Percentile), linewidth = 10) +
@@ -2548,21 +2554,21 @@ server <- function(input, output, session) {
         panel.background  = element_blank()
       )
   })
-  
+
   output$futures_score_strength <- renderUI({
     req(input$get_profile_strength)
     df <- strength_plot_data()
     avg_pct <- mean(df$Percentile, na.rm = TRUE)
     score   <- avg_pct / 10
     if (is.na(score)) return(NULL)
-    
+
     div(
       style = "display: flex; gap: 20px; justify-content: center; align-items: center;",
       tags$img(src = "black_logo.png", style = "height: 50px;"),
       div(round(score, 1), style = "font-size: 48px; font-weight: bold;")
     )
   })
-  
+
   # Trend-plot data + UI
   strength_trend_plot_data <- eventReactive(input$get_profile_strength, {
     req(input$selected_athlete_strength, input$date_range_strength)
@@ -2572,9 +2578,9 @@ server <- function(input, output, session) {
         Date >= input$date_range_strength[1],
         Date <= input$date_range_strength[2]
       ) %>%
-      select(Date, Name, IBSQT, CMJ, SHLDISOY, ProteusFullTest, TrunkRotation, D2Ext, D2Flex, Weight)
+      select(Date, Name, IBSQT, CMJ, SHLDISOY, TrunkRotation, D2Ext, D2Flex, Weight)
   })
-  
+
   observeEvent(strength_trend_plot_data(), {
     updatePickerInput(session, "strength_trend_metric",
                       choices = list(
@@ -2584,10 +2590,9 @@ server <- function(input, output, session) {
                           "SHLDISOY" = "SHLDISOY"
                         ),
                         "Proteus" = list(
-                          "Power Score" = "ProteusFullTest",
                           "Trunk Rotation" = "TrunkRotation",
                           "D2 Extension"   = "D2Ext",
-                          "D2 Flexion"   = "D2Flex",
+                          "D2 Flexion"   = "D2Flex"
                         ),
                         "Other" = list(
                           "Weight" = "Weight"
@@ -2596,7 +2601,7 @@ server <- function(input, output, session) {
                       selected = "IBSQT"
     )
   })
-  
+
   output$strength_trend_plot <- renderPlotly({
     req(input$get_profile_strength, input$strength_trend_metric, input$strength_trend_grouping)
     pd <- strength_trend_plot_data() %>%
@@ -2609,7 +2614,7 @@ server <- function(input, output, session) {
       group_by(GroupDate) %>%
       summarise(Value = mean(.data[[input$strength_trend_metric]], na.rm = TRUE), .groups = "drop") %>%
       arrange(GroupDate)
-    
+
     if (nrow(pd) == 0) {
       return(
         plot_ly() %>%
@@ -2623,16 +2628,16 @@ server <- function(input, output, session) {
           )
       )
     }
-    
+
     # calculate first & last values
     first_val  <- pd$Value[1]
     last_val   <- pd$Value[nrow(pd)]
     num_change <- round(last_val - first_val, 1)
     pct_change <- round((num_change / first_val) * 100, 1)
-    
+
     # decide on color based on sign
     subtitle_color <- if (num_change >= 0) "#008000" else "#FF0000"
-    
+
     # build the HTML‐styled subtitle
     subtitle_txt <- paste0(
       "<sup style='font-size:14px;color:", subtitle_color, ";'>",
@@ -2640,7 +2645,7 @@ server <- function(input, output, session) {
       " (", if (pct_change >= 0) "+" else "", pct_change, "%)",
       "</sup>"
     )
-    
+
     xaxis_args <- list(
       title      = "",
       tickformat = if (input$strength_trend_grouping == "month") "%b %Y" else "%b %d",
@@ -2650,7 +2655,7 @@ server <- function(input, output, session) {
       xaxis_args$tickmode <- "array"
       xaxis_args$tickvals <- unique(pd$GroupDate)
     }
-    
+
     plot_ly(
       data = pd,
       x    = ~GroupDate,
@@ -2668,7 +2673,7 @@ server <- function(input, output, session) {
             input$strength_trend_metric, " by ",
             if (input$strength_trend_grouping == "month") "Month" else "Date",
             "<br>",
-            subtitle_txt 
+            subtitle_txt
           ),
           x = 0.5
         ),
@@ -2696,7 +2701,7 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   # build the summary only once you click “Get Profile”
   forceplate_summary_data <- eventReactive(input$get_profile_strength, {
     req(input$selected_athlete_strength, input$date_range_strength)
@@ -2712,11 +2717,11 @@ server <- function(input, output, session) {
         SHLDISOY    = if (all(is.na(SHLDISOY)))    NA_real_ else mean(SHLDISOY,    na.rm = TRUE)
       )
   })
-  
+
   output$forceplate_summary_table <- render_gt({
     df <- forceplate_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
       gt() %>%
       tab_header(
@@ -2741,19 +2746,19 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       tab_style(
         style = cell_text(align = "center"),
         locations = cells_body(everything())
       ) %>%
       cols_width(
         everything() ~ px(420)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   proteus_summary_data <- eventReactive(input$get_profile_strength, {
     req(input$selected_athlete_strength, input$date_range_strength)
     strength_data %>%
@@ -2769,11 +2774,11 @@ server <- function(input, output, session) {
         `Trunk Rotation` = round(mean(TrunkRotation, na.rm = TRUE), 1)
       )
   })
-  
+
   output$proteus_summary_table <- render_gt({
     df <- proteus_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
       gt() %>%
       tab_header(
@@ -2798,26 +2803,26 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       tab_style(
         style = cell_text(align = "center"),
         locations = cells_body(everything())
       ) %>%
       cols_width(
         everything() ~ px(252)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
+
   # inside server()
   selected_strength_table <- reactiveVal("forceplate")
-  
+
   observeEvent(input$get_profile_strength, {
     selected_strength_table("forceplate")
   })
-  
+
   observeEvent(input$show_forceplate_table, {
     selected_strength_table("forceplate")
   })
@@ -2825,10 +2830,10 @@ server <- function(input, output, session) {
   observeEvent(input$show_proteus_table, {
     selected_strength_table("proteus")
   })
-  
+
   output$strength_summary_tables <- renderUI({
     req(input$get_profile_strength, selected_strength_table())
-    
+
     switch(selected_strength_table(),
            forceplate = layout_columns(
              div(style = "margin: 0 auto 30px auto;",
@@ -2842,21 +2847,21 @@ server <- function(input, output, session) {
            )
     )
   })
-  
-  
+
+
   # ── SPEED: data + plots ──────────────────────────────────────────
-  
+
   speed_plot_data <- eventReactive(input$get_profile_speed, {
     req(input$selected_athlete_speed, input$date_range_speed)
     athlete    <- input$selected_athlete_speed
     date_range <- input$date_range_speed
-    
+
     # 1. athlete summary within date range
     athlete_summary <- speed_data %>%
       filter(Name == athlete,
              Date >= date_range[1],
              Date <= date_range[2]) %>%
-      arrange(desc(Date)) %>% 
+      arrange(desc(Date)) %>%
       summarise(
         Name                = first(Name),
         Level               = first(Level),
@@ -2868,7 +2873,7 @@ server <- function(input, output, session) {
         max_velocity        = if (all(is.na(max_velocity)))       NA_real_ else max(max_velocity,       na.rm = TRUE),
         .groups = "drop"
       )
-    
+
     # 2. facility summary over all dates (same Level & Gender)
     facility_summary <- speed_data %>%
       filter(
@@ -2886,12 +2891,12 @@ server <- function(input, output, session) {
         max_velocity       = if (all(is.na(max_velocity)))       NA_real_ else max(max_velocity,       na.rm = TRUE),
         .groups = "drop"
       )
-    
+
     # 3. replace facility’s old athlete row with date-range summary
     facility_override <- facility_summary %>%
       filter(Name != athlete) %>%
       bind_rows(athlete_summary)
-    
+
     # 4. compute percentiles (lower times = higher pct)
     facility_with_pct <- facility_override %>%
       mutate(
@@ -2901,7 +2906,7 @@ server <- function(input, output, session) {
         forty_yard_Percentile         = round(percent_rank(-forty_yard)         * 100),
         max_velocity_Percentile       = round(percent_rank(max_velocity)        * 100)
       )
-    
+
     # 5. pivot athlete percentiles into two columns
     athlete_percentiles <- facility_with_pct %>%
       filter(Name == athlete) %>%
@@ -2926,11 +2931,11 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   output$speed_percentile_plot <- renderPlot({
     req(input$get_profile_speed)
     df <- speed_plot_data()
-    
+
     ggplot(df, aes(x = Percentile, y = Metric, color = Percentile)) +
       geom_segment(aes(x = 0,    xend = 100, y = Metric, yend = Metric), color = "#B9CED0", linewidth = 2) +
       geom_segment(aes(x = -2.5, xend = Percentile, y = Metric, yend = Metric, color = Percentile), linewidth = 10) +
@@ -2950,21 +2955,21 @@ server <- function(input, output, session) {
         panel.background  = element_blank()
       )
   })
-  
+
   output$futures_score_speed <- renderUI({
     req(input$get_profile_speed)
     df <- speed_plot_data()
     avg_pct <- mean(df$Percentile, na.rm = TRUE)
     score   <- avg_pct / 10
     if (is.na(score)) return(NULL)
-    
+
     div(
       style = "display: flex; gap: 20px; justify-content: center; align-items: center;",
       tags$img(src = "black_logo.png", style = "height: 50px;"),
       div(round(score, 1), style = "font-size: 48px; font-weight: bold;")
     )
   })
-  
+
   # Trend-plot data + UI
   speed_trend_plot_data <- eventReactive(input$get_profile_speed, {
     req(input$selected_athlete_speed, input$date_range_speed)
@@ -2977,7 +2982,7 @@ server <- function(input, output, session) {
       ) %>%
       select(Date, Name, early_acceleration, late_acceleration, thirty_yard, forty_yard, max_velocity)
   })
-  
+
   observeEvent(speed_trend_plot_data(), {
     updatePickerInput(session, "speed_trend_metric",
                       choices = list(
@@ -2992,7 +2997,7 @@ server <- function(input, output, session) {
                       selected = "early_acceleration"
     )
   })
-  
+
   output$speed_trend_plot <- renderPlotly({
     req(input$get_profile_speed, input$speed_trend_metric, input$speed_trend_grouping)
     pd <- speed_trend_plot_data() %>%
@@ -3005,7 +3010,7 @@ server <- function(input, output, session) {
       group_by(GroupDate) %>%
       summarise(Value = mean(.data[[input$speed_trend_metric]], na.rm = TRUE), .groups = "drop") %>%
       arrange(GroupDate)
-    
+
     if (nrow(pd) == 0) {
       return(
         plot_ly() %>%
@@ -3019,24 +3024,24 @@ server <- function(input, output, session) {
           )
       )
     }
-    
+
     # calculate first & last values
     first_val  <- pd$Value[1]
     last_val   <- pd$Value[nrow(pd)]
     num_change <- round(last_val - first_val, 3)
     pct_change <- round((num_change / first_val) * 100, 1)
-    
+
     # determine if this is a "lower is better" metric
     time_metrics <- c("early_acceleration", "late_acceleration", "thirty_yard", "forty_yard")
     is_time_metric <- input$speed_trend_metric %in% time_metrics
-    
+
     # determine subtitle color
     subtitle_color <- if (is_time_metric) {
       if (num_change <= 0) "#008000" else "#FF0000"  # for time metrics, decrease (negative) is good
     } else {
       if (num_change >= 0) "#008000" else "#FF0000"  # for other metrics, increase (positive) is good
     }
-    
+
     # build the HTML‐styled subtitle
     subtitle_txt <- paste0(
       "<sup style='font-size:14px;color:", subtitle_color, ";'>",
@@ -3044,7 +3049,7 @@ server <- function(input, output, session) {
       " (", if (pct_change >= 0) "+" else "", pct_change, "%)",
       "</sup>"
     )
-    
+
     xaxis_args <- list(
       title      = "",
       tickformat = if (input$speed_trend_grouping == "month") "%b %Y" else "%b %d",
@@ -3054,7 +3059,7 @@ server <- function(input, output, session) {
       xaxis_args$tickmode <- "array"
       xaxis_args$tickvals <- unique(pd$GroupDate)
     }
-    
+
     plot_ly(
       data = pd,
       x    = ~GroupDate,
@@ -3072,7 +3077,7 @@ server <- function(input, output, session) {
             input$speed_trend_metric, " by ",
             if (input$speed_trend_grouping == "month") "Month" else "Date",
             "<br>",
-            subtitle_txt 
+            subtitle_txt
           ),
           x = 0.5
         ),
@@ -3100,7 +3105,7 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   # build the summary only once you click “Get Profile”
   smartspeed_summary_data <- eventReactive(input$get_profile_speed, {
     req(input$selected_athlete_speed, input$date_range_speed)
@@ -3118,11 +3123,11 @@ server <- function(input, output, session) {
         `Top Speed` = round(mean(max_velocity, na.rm = TRUE), 1)
       )
   })
-  
+
   output$smartspeed_summary_table <- render_gt({
     df <- smartspeed_summary_data()
     req(nrow(df) > 0)
-    
+
     df %>%
       gt() %>%
       tab_header(
@@ -3147,31 +3152,31 @@ server <- function(input, output, session) {
           cell_text(color = "white", weight = "bold", align = "center")
         ),
         locations = cells_column_labels(everything())
-      ) %>% 
+      ) %>%
       tab_style(
         style = cell_text(align = "center"),
         locations = cells_body(everything())
       ) %>%
       cols_width(
         everything() ~ px(252)
-      ) %>% 
+      ) %>%
       sub_missing(
         columns = everything()
       )
   })
-  
-  
+
+
   output$leaderboard_date_range_ui <- renderUI({
     dateRangeInput("leaderboard_date_range", "Select Date Range:",
                    start = Sys.Date() %m-% months(3), end = Sys.Date())
   })
-  
+
   output$leaderboard_level_ui <- renderUI({
     selectInput("leaderboard_level", "Select Level:",
                 choices = c("L1", "L2", "L3", "Collegiate", "Professional", "All"),
                 selected = "L3")
   })
-  
+
   output$leaderboard_gender_ui <- renderUI({
     req(input$leaderboard_metric)
     if (input$leaderboard_metric != "Pitching") {
@@ -3180,16 +3185,16 @@ server <- function(input, output, session) {
                   selected = "Male")
     }
   })
-  
-  
+
+
   generate_hitting_leaderboard <- function() {
     req(input$leaderboard_date_range, input$leaderboard_level)
-    
+
     df <- hitting_data %>%
       filter(Date >= input$leaderboard_date_range[1],
              Date <= input$leaderboard_date_range[2],
              Level %in% if (input$leaderboard_level == "All") unique(Level) else input$leaderboard_level,
-             Gender %in% if (input$leaderboard_gender == "All" || input$leaderboard_metric == "Pitching") unique(Gender) else input$leaderboard_gender) %>% 
+             Gender %in% if (input$leaderboard_gender == "All" || input$leaderboard_metric == "Pitching") unique(Gender) else input$leaderboard_gender) %>%
       group_by(Name, Level, Gender) %>%
       summarise(
         MaxVel = if (all(is.na(MaxVel))) NA_real_ else round(max(MaxVel, na.rm = TRUE), 1),
@@ -3200,7 +3205,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       select(-Level, -Gender)
-    
+
     reactable(
       df,
       defaultSorted = "MaxVel",
@@ -3218,15 +3223,15 @@ server <- function(input, output, session) {
       bordered = TRUE
     )
   }
-  
+
   generate_pitching_leaderboard <- function() {
     req(input$leaderboard_date_range, input$leaderboard_level)
-    
+
     df <- pitching_data %>%
       filter(Date >= input$leaderboard_date_range[1],
              Date <= input$leaderboard_date_range[2],
              Level %in% if (input$leaderboard_level == "All") unique(Level) else input$leaderboard_level,
-             TaggedPitchType == "Fastball") %>% 
+             TaggedPitchType == "Fastball") %>%
       group_by(Name, Level) %>%
       summarise(
         Max_RelSpeed = if (all(is.na(Max_RelSpeed))) NA_real_ else round(max(Max_RelSpeed, na.rm = TRUE), 1),
@@ -3235,7 +3240,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       select(-Level)
-    
+
     reactable(
       df,
       defaultSorted = "Max_RelSpeed",
@@ -3251,15 +3256,15 @@ server <- function(input, output, session) {
       bordered = TRUE
     )
   }
-  
+
   generate_strength_leaderboard <- function() {
     req(input$leaderboard_date_range, input$leaderboard_level)
-    
+
     df <- strength_data %>%
       filter(Date >= input$leaderboard_date_range[1],
              Date <= input$leaderboard_date_range[2],
              Level %in% if (input$leaderboard_level == "All") unique(Level) else input$leaderboard_level,
-             Gender %in% if (input$leaderboard_gender == "All" || input$leaderboard_metric == "Pitching") unique(Gender) else input$leaderboard_gender) %>% 
+             Gender %in% if (input$leaderboard_gender == "All" || input$leaderboard_metric == "Pitching") unique(Gender) else input$leaderboard_gender) %>%
       group_by(Name, Level, Gender) %>%
       summarise(
         CMJ = if (all(is.na(CMJ))) NA_real_ else round(max(CMJ, na.rm = TRUE)),
@@ -3269,7 +3274,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       select(-Level, -Gender)
-    
+
     reactable(
       df,
       defaultSorted = "CMJ",
@@ -3286,15 +3291,15 @@ server <- function(input, output, session) {
       bordered = TRUE
     )
   }
-  
+
   generate_speed_leaderboard <- function() {
     req(input$leaderboard_date_range, input$leaderboard_level)
-    
+
     df <- speed_data %>%
       filter(Date >= input$leaderboard_date_range[1],
              Date <= input$leaderboard_date_range[2],
              Level %in% if (input$leaderboard_level == "All") unique(Level) else input$leaderboard_level,
-             Gender %in% if (input$leaderboard_gender == "All" || input$leaderboard_metric == "Pitching") unique(Gender) else input$leaderboard_gender) %>% 
+             Gender %in% if (input$leaderboard_gender == "All" || input$leaderboard_metric == "Pitching") unique(Gender) else input$leaderboard_gender) %>%
       group_by(Name, Level, Gender) %>%
       summarise(
         early_acceleration = if (all(is.na(early_acceleration))) NA_real_ else round(min(early_acceleration, na.rm = TRUE), 3),
@@ -3305,7 +3310,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       select(-Level, -Gender)
-    
+
     reactable(
       df,
       defaultSorted = "max_velocity",
@@ -3323,10 +3328,10 @@ server <- function(input, output, session) {
       bordered = TRUE
     )
   }
-  
+
   output$leaderboard_table <- renderReactable({
     req(input$leaderboard_metric)
-    
+
     switch(input$leaderboard_metric,
            "Hitting"  = generate_hitting_leaderboard(),
            "Pitching" = generate_pitching_leaderboard(),
@@ -3334,7 +3339,7 @@ server <- function(input, output, session) {
            "Speed"    = generate_speed_leaderboard()
     )
   })
-  
+
 # Percentile Distributions ------------------------------------------------
 
   observeEvent(input$percentile_department, {
@@ -3345,12 +3350,12 @@ server <- function(input, output, session) {
                              "Speed"     = c("Early Acceleration" = "early_acceleration", "Late Acceleration" = "late_acceleration", "30 Yard" = "thirty_yard", "40 Yard" = "forty_yard", "Top Speed" = "max_velocity"),
                              character(0)
     )
-    
+
     output$metric_selector <- renderUI({
       selectInput("percentile_metric", "Select Metric:", choices = metric_choices, selected = metric_choices[1])
     })
   })
-  
+
   output$percentile_levels_ui <- renderUI({
     pickerInput("percentile_levels", "Select Level:",
                 choices = c("L1", "L2", "L3", "Collegiate", "Professional"),
@@ -3358,7 +3363,7 @@ server <- function(input, output, session) {
                 multiple = TRUE,
                 options = list('max-options' = 2))
   })
-  
+
   output$percentile_gender_ui <- renderUI({
     req(input$percentile_department)
     if (input$percentile_department != "Pitching") {
@@ -3367,20 +3372,20 @@ server <- function(input, output, session) {
                   selected = "Male")
     }
   })
-  
+
   get_filtered_data <- reactive({
     req(input$percentile_department, input$percentile_metric, input$percentile_gender, input$percentile_levels)
-    
+
     # pick the right data
     df <- switch(input$percentile_department,
                  "Hitting"   = hitting_data,
                  "Pitching"  = pitching_data %>% filter(TaggedPitchType=="Fastball"),
                  "Strength"  = strength_data,
                  "Speed"     = speed_data)
-    
+
     # make sure the metric is valid for this df
     req(input$percentile_metric %in% names(df))
-    
+
     df %>%
       filter(
         Gender %in% input$percentile_gender,
@@ -3389,16 +3394,16 @@ server <- function(input, output, session) {
       ) %>%
       mutate(Value = .data[[input$percentile_metric]])
   })
-  
+
   output$percentile_plot <- renderPlotly({
     req(get_filtered_data())
     df      <- get_filtered_data()
     levels  <- unique(df$Level)
-    
+
     # which of your metrics are "time" metrics?
     timed_metrics <- c("early_acceleration", "late_acceleration", "thirty_yard", "forty_yard")
     is_timed <- input$percentile_metric %in% timed_metrics
-    
+
     level_colors <- c(
       L1           = "#1f77b4",
       L2           = "#ff7f0e",
@@ -3406,7 +3411,7 @@ server <- function(input, output, session) {
       Collegiate   = "#d62728",
       Professional = "#9467bd"
     )
-    
+
     plot <- plot_ly()
     for (lvl in levels) {
       level_df <- df %>% filter(Level == lvl)
@@ -3417,7 +3422,7 @@ server <- function(input, output, session) {
         pct_raw <- F_ecdf(d$x) * 100
         # if time metric, invert so that smaller values → higher percentile
         pct     <- if (is_timed) 100 - pct_raw else pct_raw
-        
+
         clr <- level_colors[lvl]
         plot <- plot %>%
           add_trace(
@@ -3438,7 +3443,7 @@ server <- function(input, output, session) {
           )
       }
     }
-    
+
     plot %>%
       layout(
         title    = paste("Percentile Distribution of", input$percentile_metric),
@@ -3466,16 +3471,16 @@ server <- function(input, output, session) {
         )
       )
   })
-  
+
   # Monthly Report Downloader ----------------------------------------------
-  
+
   # UI: Populate athlete selector from client_data
   output$athlete_selector <- renderUI({
     athlete_choices <- client_data %>%
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-    
+
     pickerInput(
       inputId  = "report_athlete_name",
       label    = "Athlete:",
@@ -3489,24 +3494,24 @@ server <- function(input, output, session) {
       width = "100%"
     )
   })
-  
+
   # UI: Conditionally show download buttons based on data presence
   output$report_buttons <- renderUI({
     req(input$report_athlete_name, input$report_month, input$report_year)
-    
-    filtered_pitching <- pitching_data %>% 
+
+    filtered_pitching <- pitching_data %>%
       filter(!is.na(TaggedPitchType))
-    
+
     name <- input$report_athlete_name
     month <- input$report_month
     year <- input$report_year
-    
+
     has_data <- function(df) {
       any(format(df$Date, "%B") == month & format(df$Date, "%Y") == as.character(year) & df$Name == name)
     }
-    
+
     buttons <- tagList()
-    
+
     if (has_data(hitting_data)) {
       buttons <- tagAppendChild(buttons, downloadButton("download_hitting_report", "Hitting"))
     }
@@ -3519,19 +3524,19 @@ server <- function(input, output, session) {
     if (has_data(speed_data)) {
       buttons <- tagAppendChild(buttons, downloadButton("download_speed_report", "Speed"))
     }
-    
+
     div(style = "display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;", buttons)
   })
-  
+
   # Predefine a custom waiter for report downloads
   report_waiter <- waiter::Waiter$new(
     html = tagList(
-      spin_1(), 
+      spin_1(),
       h3("Generating your report...", style = "margin-top: 20px; color: white;")
     ),
     color = "#000000cc"  # semi-transparent black
   )
-  
+
   # Hitting Report
   output$download_hitting_report <- downloadHandler(
     filename = function() {
@@ -3540,7 +3545,7 @@ server <- function(input, output, session) {
     content = function(file) {
       report_waiter$show()
       on.exit(report_waiter$hide(), add = TRUE)
-      
+
       report_path <- generate_hitting_report(
         client_data  = client_data,
         hitting_data = hitting_data,
@@ -3552,7 +3557,7 @@ server <- function(input, output, session) {
       file.copy(report_path, file)
     }
   )
-  
+
   # Pitching Report
   output$download_pitching_report <- downloadHandler(
     filename = function() {
@@ -3561,7 +3566,7 @@ server <- function(input, output, session) {
     content = function(file) {
       report_waiter$show()
       on.exit(report_waiter$hide(), add = TRUE)
-      
+
       report_path <- generate_pitching_report(
         client_data    = client_data,
         pitching_data  = pitching_data,
@@ -3573,7 +3578,7 @@ server <- function(input, output, session) {
       file.copy(report_path, file)
     }
   )
-  
+
   # Strength Report
   output$download_strength_report <- downloadHandler(
     filename = function() {
@@ -3582,7 +3587,7 @@ server <- function(input, output, session) {
     content = function(file) {
       report_waiter$show()
       on.exit(report_waiter$hide(), add = TRUE)
-      
+
       report_path <- generate_strength_report(
         client_data   = client_data,
         strength_data = strength_data,
@@ -3593,7 +3598,7 @@ server <- function(input, output, session) {
       file.copy(report_path, file)
     }
   )
-  
+
   # Speed Report
   output$download_speed_report <- downloadHandler(
     filename = function() {
@@ -3602,7 +3607,7 @@ server <- function(input, output, session) {
     content = function(file) {
       report_waiter$show()
       on.exit(report_waiter$hide(), add = TRUE)
-      
+
       report_path <- generate_speed_report(
         client_data = client_data,
         speed_data  = speed_data,
@@ -3622,7 +3627,7 @@ server <- function(input, output, session) {
       distinct(Name) %>%
       arrange(Name) %>%
       pull(Name)
-    
+
     pickerInput(
       inputId  = "prospect_athlete_name",
       label    = "Athlete:",
@@ -3640,36 +3645,36 @@ server <- function(input, output, session) {
   # UI: Conditionally show download buttons for Prospect Reports
   output$prospect_report_buttons <- renderUI({
     req(input$prospect_athlete_name)
-    
+
     athlete_name <- input$prospect_athlete_name
-    
+
     # Check for data presence for each report type
     has_hitting_data <- any(hitting_data$Name == athlete_name, na.rm = TRUE)
     has_pitching_data <- any(pitching_data$Name == athlete_name, na.rm = TRUE)
-    
+
     buttons <- tagList()
-    
+
     if (has_hitting_data) {
       buttons <- tagAppendChild(
-        buttons, 
+        buttons,
         downloadButton(
           "download_hitting_prospect_report",
           "Hitting Prospect Report"
         )
       )
     }
-    
+
     # # NEW: Add a download button if the athlete has pitching data
     # if (has_pitching_data) {
     #   buttons <- tagAppendChild(
-    #     buttons, 
+    #     buttons,
     #     downloadButton(
-    #       "download_pitching_prospect_report", 
+    #       "download_pitching_prospect_report",
     #       "Pitching Prospect Report"
     #     )
     #   )
     # }
-    
+
     div(style = "display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;", buttons)
   })
 
@@ -3681,7 +3686,7 @@ server <- function(input, output, session) {
     content = function(file) {
       report_waiter$show()
       on.exit(report_waiter$hide(), add = TRUE)
-      
+
       report_path <- generate_hitting_report(
         client_data   = client_data,
         hitting_data  = hitting_data,
@@ -3690,7 +3695,7 @@ server <- function(input, output, session) {
         speed_data    = speed_data,
         athlete       = input$prospect_athlete_name
       )
-      
+
       file.copy(report_path, file)
     }
   )
@@ -3703,7 +3708,7 @@ server <- function(input, output, session) {
   #   content = function(file) {
   #     report_waiter$show()
   #     on.exit(report_waiter$hide(), add = TRUE)
-      
+
   #     # Call the pitching report function with its specific parameters
   #     report_path <- generate_pitching_report(
   #       client_data     = client_data,
@@ -3718,7 +3723,7 @@ server <- function(input, output, session) {
   #       offspeed_params = offspeed_params,
   #       athlete         = input$prospect_athlete_name
   #     )
-      
+
   #     file.copy(report_path, file)
   #   }
   # )
